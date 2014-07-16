@@ -25,7 +25,7 @@ set (Boost_USE_STATIC_LIBS ON)
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_RUNTIME PROJECT_STATIC_RUNTIME)
 
-find_package(Boost REQUIRED COMPONENTS locale filesystem system regex iostreams)
+find_package(Boost REQUIRED COMPONENTS locale filesystem system iostreams)
 
 set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
                     "${CMAKE_SOURCE_DIR}/src/backend/helpers.cpp"
@@ -35,6 +35,17 @@ set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/libloadorder.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/activeplugins.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/loadorder.cpp")
+
+set (PROJECT_HEADERS "${CMAKE_SOURCE_DIR}/src/backend/error.h"
+                    "${CMAKE_SOURCE_DIR}/src/backend/helpers.h"
+                    "${CMAKE_SOURCE_DIR}/src/backend/game.h"
+                    "${CMAKE_SOURCE_DIR}/src/backend/plugins.h"
+                    "${CMAKE_SOURCE_DIR}/src/api/constants.h"
+                    "${CMAKE_SOURCE_DIR}/src/api/libloadorder.h"
+                    "${CMAKE_SOURCE_DIR}/src/api/activeplugins.h"
+                    "${CMAKE_SOURCE_DIR}/src/api/loadorder.h")
+
+source_group("Header Files" FILES ${PROJECT_HEADERS})
 
 set (TESTER_SRC "${CMAKE_SOURCE_DIR}/src/tester.cpp")
 
@@ -88,7 +99,7 @@ ENDIF ()
 ##############################
 
 # Build libloadorder library.
-add_library           (loadorder${PROJECT_ARCH} ${PROJECT_SRC})
+add_library           (loadorder${PROJECT_ARCH} ${PROJECT_SRC} ${PROJECT_HEADERS})
 target_link_libraries (loadorder${PROJECT_ARCH} ${Boost_LIBRARIES} ${PROJECT_LIBS})
 
 # Build libloadorder tester.
