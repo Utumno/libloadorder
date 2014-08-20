@@ -21,7 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with libloadorder.  If not, see
     <http://www.gnu.org/licenses/>.
-*/
+    */
 
 #ifndef __LIBLO_HELPERS_H__
 #define __LIBLO_HELPERS_H__
@@ -39,25 +39,6 @@ namespace liblo {
     //Only ever have to convert between UTF-8 and Windows-1252.
     std::string ToUTF8(const std::string& str);
     std::string FromUTF8(const std::string& str);
-
-    //Version class for more robust version comparisons.
-    class Version {
-    private:
-        std::string verString;
-    public:
-        Version();
-        Version(const char * ver);
-        Version(const boost::filesystem::path& file);
-
-        std::string AsString() const;
-
-        bool operator > (const Version& rhs) const;
-        bool operator < (const Version& rhs) const;
-        bool operator >= (const Version& rhs) const;
-        bool operator <= (const Version& rhs) const;
-        bool operator == (const Version& rhs) const;
-        bool operator != (const Version& rhs) const;
-    };
 }
 
 #endif

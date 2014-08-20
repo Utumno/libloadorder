@@ -21,32 +21,18 @@
     You should have received a copy of the GNU General Public License
     along with libloadorder.  If not, see
     <http://www.gnu.org/licenses/>.
-*/
+    */
 
 #include "../api/constants.h"
 #include "helpers.h"
 #include "error.h"
 #include "streams.h"
 #include <cstring>
-#include <sstream>
-#include <boost/spirit/include/support_istream_iterator.hpp>
-#include <boost/spirit/include/karma.hpp>
 #include <boost/locale.hpp>
-
-#if _WIN32 || _WIN64
-#   ifndef UNICODE
-#       define UNICODE
-#   endif
-#   ifndef _UNICODE
-#      define _UNICODE
-#   endif
-#   include "windows.h"
-#endif
 
 using namespace std;
 
 namespace liblo {
-
     // std::string to null-terminated char string converter.
     char * ToNewCString(const string& str) {
         char * p = new char[str.length() + 1];
@@ -65,8 +51,9 @@ namespace liblo {
                 istream_iterator<char>(ifile),
                 istream_iterator<char>(),
                 back_inserter(buffer)
-            );
-        } catch (std::ios_base::failure& e) {
+                );
+        }
+        catch (std::ios_base::failure& e) {
             throw error(LIBLO_ERROR_FILE_READ_FAIL, "\"" + file.string() + "\" could not be read. Details: " + e.what());
         }
     }
@@ -74,7 +61,8 @@ namespace liblo {
     std::string ToUTF8(const std::string& str) {
         try {
             return boost::locale::conv::to_utf<char>(str, "Windows-1252", boost::locale::conv::stop);
-        } catch (boost::locale::conv::conversion_error& /*e*/) {
+        }
+        catch (boost::locale::conv::conversion_error& /*e*/) {
             throw error(LIBLO_WARN_BAD_FILENAME, "\"" + str + "\" cannot be encoded in Windows-1252.");
         }
     }
@@ -82,112 +70,9 @@ namespace liblo {
     std::string FromUTF8(const std::string& str) {
         try {
             return boost::locale::conv::from_utf<char>(str, "Windows-1252", boost::locale::conv::stop);
-        } catch (boost::locale::conv::conversion_error& /*e*/) {
+        }
+        catch (boost::locale::conv::conversion_error& /*e*/) {
             throw error(LIBLO_WARN_BAD_FILENAME, "\"" + str + "\" cannot be encoded in Windows-1252.");
         }
-    }
-
-
-    //////////////////////////////
-    // Version Class Functions
-    //////////////////////////////
-
-    Version::Version() {}
-
-    Version::Version(const char * ver)
-        : verString(ver) {}
-
-    Version::Version(const boost::filesystem::path& file) {
-#if _WIN32 || _WIN64
-        DWORD dummy = 0;
-        DWORD size = GetFileVersionInfoSize(file.wstring().c_str(), &dummy);
-
-        if (size > 0) {
-            LPBYTE point = new BYTE[size];
-            UINT uLen;
-            VS_FIXEDFILEINFO *info;
-            string ver;
-
-            GetFileVersionInfo(file.wstring().c_str(),0,size,point);
-
-            VerQueryValue(point,L"\\",(LPVOID *)&info,&uLen);
-
-            DWORD dwLeftMost     = HIWORD(info->dwFileVersionMS);
-            DWORD dwSecondLeft   = LOWORD(info->dwFileVersionMS);
-            DWORD dwSecondRight  = HIWORD(info->dwFileVersionLS);
-            DWORD dwRightMost    = LOWORD(info->dwFileVersionLS);
-
-            delete [] point;
-
-            verString = to_string(dwLeftMost) + '.' + to_string(dwSecondLeft) + '.' + to_string(dwSecondRight) + '.' + to_string(dwRightMost);
-        }
-#else
-        // ensure filename has no quote characters in it to avoid command injection attacks
-        if (string::npos == file.string().find('"')) {
-            // command mostly borrowed from the gnome-exe-thumbnailer.sh script
-            // wrestool is part of the icoutils package
-            string cmd = "wrestool --extract --raw --type=version \"" + file.string() + "\" | tr '\\0, ' '\\t.\\0' | sed 's/\\t\\t/_/g' | tr -c -d '[:print:]' | sed -r 's/.*Version[^0-9]*([0-9]+(\\.[0-9]+)+).*/\\1/'";
-
-            FILE *fp = popen(cmd.c_str(), "r");
-
-            // read out the version string
-            static const unsigned int BUFSIZE = 32;
-            char buf[BUFSIZE];
-            if (nullptr != fgets(buf, BUFSIZE, fp))
-                verString = string(buf);
-            pclose(fp);
-        }
-#endif
-    }
-
-    string Version::AsString() const {
-        return verString;
-    }
-
-    bool Version::operator < (const Version& ver) const {
-        /* In libloadorder, the version comparison is only used for checking the versions of games,
-           which always have the format "a.b.c.d" where a, b, c and d are all integers. */
-
-        istringstream parser1(verString);
-        istringstream parser2(ver.AsString());
-        while (parser1.good() || parser2.good()) {
-            //Check if each stringstream is OK for i/o before doing anything with it. If not, replace its extracted value with a 0.
-            unsigned int n1, n2;
-            if (parser1.good()) {
-                parser1 >> n1;
-                parser1.get();
-            } else
-                n1 = 0;
-            if (parser2.good()) {
-                parser2 >> n2;
-                parser2.get();
-            } else
-                n2 = 0;
-            if (n1 < n2)
-                return true;
-            else if (n1 > n2)
-                return false;
-        }
-        return false;
-    }
-
-    bool Version::operator > (const Version& rhs) const {
-        return *this != rhs && !(*this < rhs);
-    }
-
-    bool Version::operator >= (const Version& rhs) const {
-        return *this == rhs || *this > rhs;
-    }
-
-    bool Version::operator <= (const Version& rhs) const {
-        return *this == rhs || *this < rhs;
-    }
-
-    bool Version::operator == (const Version& rhs) const {
-        return verString == rhs.AsString();
-    }
-
-    bool Version::operator != (const Version& rhs) const {
-        return !(*this == rhs);
     }
 }
