@@ -65,7 +65,7 @@ namespace liblo {
 
         fs::path filepath = parentGame.PluginsFolder() / name;
         if (IsGhosted(parentGame))
-            filepath += ".ghost";
+            filepath = filepath.string() + ".ghost";
 
         try {
             if (parentGame.Id() == LIBLO_GAME_TES3)
@@ -311,6 +311,9 @@ namespace liblo {
     }
 
     void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame) const {
+        if (empty())
+            return;
+
         if (at(0) != Plugin(parentGame.MasterFile()))
             throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + parentGame.MasterFile() + "\" is not the first plugin in load order.");
 
@@ -384,7 +387,10 @@ namespace liblo {
             if (!at(i).IsMasterFile(parentGame))
                 return i - 1;
         }
-        return max - 1;
+        if (max > 0)
+            return max - 1;
+        else
+            return 0;
     }
 
     void LoadOrder::LoadFromFile(const _lo_game_handle_int& parentGame, const fs::path& file) {
@@ -450,7 +456,7 @@ namespace liblo {
                             continue;
 
                         //Now cut off everything up to and including the = sign.
-                        emplace(Plugin(ToUTF8(line.substr(line.find('=') + 1))));
+                        insert(Plugin(ToUTF8(line.substr(line.find('=') + 1))));
                     }
                 }
                 else {
@@ -458,7 +464,7 @@ namespace liblo {
                         if (line.empty() || line[0] == '#')  //Character comparison is OK because it's ASCII.
                             continue;
 
-                        emplace(Plugin(ToUTF8(line)));
+                        insert(Plugin(ToUTF8(line)));
                     }
                 }
                 in.close();
@@ -471,9 +477,9 @@ namespace liblo {
         //Add skyrim.esm, update.esm if missing.
         if (parentGame.Id() == LIBLO_GAME_TES5) {
             if (find(Plugin("Skyrim.esm")) == end())
-                emplace(Plugin("Skyrim.esm"));
+                insert(Plugin("Skyrim.esm"));
             if (Plugin("Update.esm").Exists(parentGame) && find(Plugin("Update.esm")) == end())
-                emplace(Plugin("Update.esm"));
+                insert(Plugin("Update.esm"));
         }
     }
 
@@ -547,10 +553,10 @@ namespace liblo {
                 throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + plugin.Name() + "\" is not installed.");
             /*vector<Plugin> masters = plugin.GetMasters(parentGame);
             //Disabled because it causes false positives for Filter patches. This means libloadorder doesn't check to ensure all a plugin's masters are active, but I don't think it should get mixed up with Bash Tag detection.
-                    for (const auto& master: masters) {
-                    if (this->find(master) == this->end())
-                    throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + plugin.Name() + "\" has a master (\"" + master.Name() + "\") which isn't active.");
-                    }*/
+            for (const auto& master: masters) {
+            if (this->find(master) == this->end())
+            throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + plugin.Name() + "\" has a master (\"" + master.Name() + "\") which isn't active.");
+            }*/
         }
 
         if (size() > 255)
