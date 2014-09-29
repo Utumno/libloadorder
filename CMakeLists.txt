@@ -7,7 +7,7 @@
 # General Settings
 ##############################
 
-cmake_minimum_required (VERSION 2.8.9)
+cmake_minimum_required (VERSION 2.8)
 project (libloadorder)
 
 option(BUILD_SHARED_LIBS "Build a shared library" OFF)
@@ -21,11 +21,12 @@ IF (NOT DEFINED LIBESPM_ROOT)
     set (LIBESPM_ROOT "../libespm")
 ENDIF ()
 
-set (Boost_USE_STATIC_LIBS ON)
+set (Boost_USE_STATIC_LIBS ${PROJECT_STATIC_RUNTIME})
 set (Boost_USE_MULTITHREADED ON)
-set (Boost_USE_STATIC_RUNTIME PROJECT_STATIC_RUNTIME)
+set (Boost_USE_STATIC_RUNTIME ${PROJECT_STATIC_RUNTIME})
 
 find_package(Boost REQUIRED COMPONENTS locale filesystem system iostreams)
+find_package(GTest REQUIRED)
 
 set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
                     "${CMAKE_SOURCE_DIR}/src/backend/helpers.cpp"
@@ -47,14 +48,13 @@ set (PROJECT_HEADERS "${CMAKE_SOURCE_DIR}/src/backend/error.h"
 
 source_group("Header Files" FILES ${PROJECT_HEADERS})
 
-set (TESTER_SRC "${CMAKE_SOURCE_DIR}/src/tester.cpp")
+set (TESTER_SRC "${CMAKE_SOURCE_DIR}/src/tests/api.cpp")
 
 # Include source and library directories.
 include_directories ("${CMAKE_SOURCE_DIR}/src"
                      ${LIBESPM_ROOT}
-                     ${Boost_INCLUDE_DIRS})
-
-set (PROJECT_LIBS version)
+                     ${Boost_INCLUDE_DIRS}
+                     ${GTEST_INCLUDE_DIRS})
 
 
 ##############################
@@ -71,13 +71,26 @@ IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
     ENDIF ()
 ENDIF ()
 
-# MinGW settings.
+
 IF (MINGW)
-    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3")
-    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3")
-    set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc -Wl,--subsystem,windows")
-    set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc -Wl,--subsystem,windows")
-    set (CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc -Wl,--subsystem,windows")
+    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
+    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
+    set (CMAKE_EXE_LINKER_FLAGS "-Wl,--subsystem,windows")
+    set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--subsystem,windows")
+    set (CMAKE_MODULE_LINKER_FLAGS "-Wl,--subsystem,windows")
+    IF (PROJECT_STATIC_RUNTIME)
+        set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc ${CMAKE_EXE_LINKER_FLAGS}")
+        set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc ${CMAKE_SHARED_LINKER_FLAGS}")
+        set (CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc ${CMAKE_MODULE_LINKER_FLAGS}")
+    ENDIF ()
+ELSEIF (CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
+    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
+    IF (PROJECT_STATIC_RUNTIME)
+        set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+        set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+        set (CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
+    ENDIF ()
 ELSEIF (MSVC)
     # Update compiler flags.
     IF (PROJECT_STATIC_RUNTIME)
@@ -90,8 +103,8 @@ ELSEIF (MSVC)
             SET("${flag}" "${${flag}} /EHsc")
         ENDFOREACH()
     ENDIF ()
+    set (PROJECT_LIBS version)
 ENDIF ()
-
 
 
 ##############################
@@ -104,4 +117,7 @@ target_link_libraries (loadorder${PROJECT_ARCH} ${Boost_LIBRARIES} ${PROJECT_LIB
 
 # Build libloadorder tester.
 add_executable        (libloadorder-tester ${TESTER_SRC})
-target_link_libraries (libloadorder-tester loadorder${PROJECT_ARCH} ${Boost_LIBRARIES} ${PROJECT_LIBS})
+target_link_libraries (libloadorder-tester loadorder${PROJECT_ARCH} ${Boost_LIBRARIES} ${PROJECT_LIBS} ${GTEST_BOTH_LIBRARIES})
+
+add_custom_command(TARGET libloadorder-tester
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/tests/plugins $<TARGET_FILE_DIR:libloadorder-tester>/game/Data)
