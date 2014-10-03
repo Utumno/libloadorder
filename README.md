@@ -1,5 +1,7 @@
 # Libloadorder
 
+[![Build Status](https://travis-ci.org/WrinklyNinja/libloadorder.svg?branch=master)](https://travis-ci.org/WrinklyNinja/libloadorder)
+
 Libloadorder is a free software library for manipulating the load order and active status of plugins for TES III: Morrowind, TES IV: Oblivion, TES V: Skyrim, Fallout 3 and Fallout: New Vegas.
 
 
@@ -12,7 +14,7 @@ Instructions for other platforms are not provided, but the process for building 
 ### Requirements
 
 * [Boost](http://www.boost.org): tested with v1.48.0 and v1.56.0.
-* [Google Test](https://code.google.com/p/googletest/): The CMake config currently requires this, even though it's only used by libloadorder's test suite.
+* [Google Test](https://code.google.com/p/googletest/): Required to build libloadorder's tests, but not the library itself.
 * [Libespm](http://github.com/WrinklyNinja/libespm): A header-only library.
 
 ### Windows
