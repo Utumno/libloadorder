@@ -32,6 +32,7 @@
 #include <unordered_set>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
+#include <src/libespm.h>
 
 struct _lo_game_handle_int;
 
@@ -43,8 +44,8 @@ namespace liblo {
 
         std::string Name() const;
 
-        bool    IsValid() const;  //.Checks if plugin is a .esp or .esm file.
-        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const;         //This should be implemented using libespm.
+        bool    IsValid(const _lo_game_handle_int& parentGame) const;  // Attempts to parse the plugin header.
+        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const;         // Checks master flag bit.
         bool    IsFalseFlagged(const _lo_game_handle_int& parentGame) const;           //True if IsMasterFile does not match file extension.
         bool    IsGhosted(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in ghosted form.
         bool    Exists(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in the data folder, ghosted or not.
@@ -58,6 +59,8 @@ namespace liblo {
         bool operator != (const Plugin& rhs) const;
     private:
         std::string name;
+
+        espm::File * ReadHeader(const _lo_game_handle_int& parentGame) const;
     };
 
     class LoadOrder : public std::vector < Plugin > {
