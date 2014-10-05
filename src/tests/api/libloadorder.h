@@ -27,7 +27,6 @@ along with libloadorder.  If not, see
 #define __LIBLO_TEST_API__
 
 #include "tests/fixtures.h"
-#include "backend/helpers.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -99,34 +98,52 @@ TEST(Cleanup, HandlesNoError) {
     EXPECT_EQ(nullptr, error);
 }
 
-TEST_F(GameHandleCreationTest, HandlesValidInputs) {
-    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES3, "./game", "./local"));
+TEST_F(OblivionHandleCreationTest, HandlesValidInputs) {
+    // Try all the game codes, it doesn't matter for lo_create_handle what game is actually at the given paths.
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES3, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
     ASSERT_NO_THROW(lo_destroy_handle(gh));
-    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES4, "./game", "./local"));
+    gh = nullptr;
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
     ASSERT_NO_THROW(lo_destroy_handle(gh));
-    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES5, "./game", "./local"));
+    gh = nullptr;
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES5, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
     ASSERT_NO_THROW(lo_destroy_handle(gh));
-    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_FO3, "./game", "./local"));
+    gh = nullptr;
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_FO3, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
     ASSERT_NO_THROW(lo_destroy_handle(gh));
-    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_FNV, "./game", "./local"));
+    gh = nullptr;
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_FNV, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
+    ASSERT_NO_THROW(lo_destroy_handle(gh));
+    gh = nullptr;
+
+    // Also test absolute paths.
+    boost::filesystem::path game = boost::filesystem::current_path() / dataPath.parent_path();
+    boost::filesystem::path local = boost::filesystem::current_path() / localPath;
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES5, game.string().c_str(), local.string().c_str()));
 }
 
-TEST_F(GameHandleCreationTest, HandlesInvalidHandleInput) {
-    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(NULL, LIBLO_GAME_TES4, "./game", "./local"));
+TEST_F(OblivionHandleCreationTest, HandlesInvalidHandleInput) {
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(NULL, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
 }
 
-TEST_F(GameHandleCreationTest, HandlesInvalidGameType) {
-    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, UINT_MAX, "./game", "./local"));
+TEST_F(OblivionHandleCreationTest, HandlesInvalidGameType) {
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, UINT_MAX, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
 }
 
-TEST_F(GameHandleCreationTest, HandlesInvalidGamePathInput) {
-    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, NULL, "./local"));
-    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, "/\0", "./local"));
+TEST_F(OblivionHandleCreationTest, HandlesInvalidGamePathInput) {
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, NULL, localPath.string().c_str()));
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, missingPath.string().c_str(), localPath.string().c_str()));
 }
 
-TEST_F(GameHandleCreationTest, HandlesInvalidLocalPathInput) {
-    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, "./game", "/\0"));
+TEST_F(OblivionHandleCreationTest, HandlesInvalidLocalPathInput) {
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), missingPath.string().c_str()));
 }
+
+#ifdef _WIN32
+TEST_F(OblivionHandleCreationTest, HandlesNullLocalPath) {
+    EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), NULL));
+}
+#endif
 
 TEST(GameHandleDestroyTest, HandledNullInput) {
     ASSERT_NO_THROW(lo_destroy_handle(NULL));
@@ -183,10 +200,13 @@ TEST_F(OblivionOperationsTest, FixPluginLists) {
     };
     std::list<std::string> actualLines;
     std::string content;
-    liblo::fileToBuffer(localPath / "plugins.txt", content);
-    boost::split(actualLines, content, [](char c) {
-        return c == '\n';
-    });
+    liblo::ifstream in(localPath / "plugins.txt");
+    while (in.good()) {
+        std::string line;
+        std::getline(in, line);
+        actualLines.push_back(line);
+    }
+    in.close();
     actualLines.pop_back();  // Remove the trailing newline.
     actualLines.sort();
 
