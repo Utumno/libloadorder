@@ -104,16 +104,11 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
 
     try {
         // Check for valid paths.
-        boost::filesystem::path testPath(gamePath);
-        for (const auto& name : testPath) {
-            if (!boost::filesystem::native(name.string()))
-                return c_error(LIBLO_ERROR_INVALID_ARGS, "Invalid game path specified.");
-        }
-        testPath = localPath;
-        for (const auto& name : testPath) {
-            if (!boost::filesystem::native(name.string()))
-                return c_error(LIBLO_ERROR_INVALID_ARGS, "Invalid local data path specified.");
-        }
+        if (!boost::filesystem::is_directory(gamePath))
+            return c_error(LIBLO_ERROR_INVALID_ARGS, "Given game path \"" + string(gamePath) + "\" is not a valid directory.");
+
+        if (localPath != nullptr && !boost::filesystem::is_directory(localPath))
+            return c_error(LIBLO_ERROR_INVALID_ARGS, "Given local data path \"" + string(localPath) + "\" is not a valid directory.");
 
         //Create handle.
         *gh = new _lo_game_handle_int(gameId, gamePath);
@@ -147,9 +142,12 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
         }
         catch (error& e) {
             delete *gh;
+            *gh = nullptr;
             return c_error(e);
         }
         catch (std::exception& e) {
+            delete *gh;
+            *gh = nullptr;
             return c_error(LIBLO_ERROR_FILE_READ_FAIL, e.what());
         }
 
@@ -230,9 +228,7 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
             }
 
             // Ensure that the first plugin is the game's master file.
-            if (!gh->loadOrder.empty() && !boost::iequals(gh->loadOrder.begin()->Name(), gh->MasterFile())) {
-                gh->loadOrder.Move(gh->MasterFile(), gh->loadOrder.begin());
-            }
+            gh->loadOrder.Move(gh->MasterFile(), gh->loadOrder.begin());
 
             // Now check all plugins' existences.
             // Also check that no plugin appears more than once.
@@ -283,8 +279,8 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
 
         if (gh->Id() == LIBLO_GAME_TES5) {
             // Ensure Skyrim.esm is active.
-            if (gh->activePlugins.find(Plugin("Skyrim.esm")) == gh->activePlugins.end())
-                gh->activePlugins.insert(Plugin("Skyrim.esm"));
+            if (gh->activePlugins.find(Plugin(gh->MasterFile())) == gh->activePlugins.end())
+                gh->activePlugins.insert(Plugin(gh->MasterFile()));
 
             // Ensure Update.esm is active, if it is installed.
             if (Plugin("Update.esm").Exists(*gh) && gh->activePlugins.find(Plugin("Update.esm")) == gh->activePlugins.end())
