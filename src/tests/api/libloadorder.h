@@ -31,7 +31,7 @@ along with libloadorder.  If not, see
 #include <boost/algorithm/string.hpp>
 
 TEST(GetVersion, HandlesNullInput) {
-    unsigned int vMajor, vMinor, vPatch;
+    unsigned int vMajor = 0, vMinor = 0, vPatch = 0;
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_get_version(&vMajor, NULL, NULL));
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_get_version(NULL, &vMinor, NULL));
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_get_version(NULL, NULL, &vPatch));
@@ -39,12 +39,12 @@ TEST(GetVersion, HandlesNullInput) {
 }
 
 TEST(GetVersion, HandlesValidInput) {
-    unsigned int vMajor, vMinor, vPatch;
+    unsigned int vMajor = 0, vMinor = 0, vPatch = 0;
     EXPECT_EQ(LIBLO_OK, lo_get_version(&vMajor, &vMinor, &vPatch));
 }
 
 TEST(IsCompatible, HandlesCompatibleVersion) {
-    unsigned int vMajor, vMinor, vPatch;
+    unsigned int vMajor = 0, vMinor = 0, vPatch = 0;
     EXPECT_EQ(LIBLO_OK, lo_get_version(&vMajor, &vMinor, &vPatch));
 
     EXPECT_TRUE(lo_is_compatible(vMajor, vMinor, vPatch));
@@ -55,7 +55,7 @@ TEST(IsCompatible, HandlesCompatibleVersion) {
 }
 
 TEST(IsCompatible, HandlesIncompatibleVersion) {
-    unsigned int vMajor, vMinor, vPatch;
+    unsigned int vMajor = 0, vMinor = 0, vPatch = 0;
     EXPECT_EQ(LIBLO_OK, lo_get_version(&vMajor, &vMinor, &vPatch));
 
     EXPECT_FALSE(lo_is_compatible(vMajor + 1, vMinor, vPatch));
@@ -68,7 +68,7 @@ TEST(IsCompatible, HandlesIncompatibleVersion) {
 TEST(GetErrorMessage, HandlesInputCorrectly) {
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_get_error_message(NULL));
 
-    const char * error;
+    const char * error = nullptr;
     EXPECT_EQ(LIBLO_OK, lo_get_error_message(&error));
     ASSERT_STREQ("Null pointer passed.", error);
 }
@@ -78,7 +78,7 @@ TEST(Cleanup, CleansUpAfterError) {
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_get_error_message(NULL));
 
     // Check that the error message is non-null.
-    const char * error;
+    const char * error = nullptr;
     EXPECT_EQ(LIBLO_OK, lo_get_error_message(&error));
     ASSERT_STREQ("Null pointer passed.", error);
 
@@ -128,20 +128,25 @@ TEST_F(OblivionHandleCreationTest, HandlesInvalidHandleInput) {
 
 TEST_F(OblivionHandleCreationTest, HandlesInvalidGameType) {
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, UINT_MAX, dataPath.parent_path().string().c_str(), localPath.string().c_str()));
+    EXPECT_EQ(NULL, gh);
 }
 
 TEST_F(OblivionHandleCreationTest, HandlesInvalidGamePathInput) {
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, NULL, localPath.string().c_str()));
+    EXPECT_EQ(NULL, gh);
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, missingPath.string().c_str(), localPath.string().c_str()));
+    EXPECT_EQ(NULL, gh);
 }
 
 TEST_F(OblivionHandleCreationTest, HandlesInvalidLocalPathInput) {
     EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_create_handle(&gh, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), missingPath.string().c_str()));
+    EXPECT_EQ(NULL, gh);
 }
 
 #ifdef _WIN32
 TEST_F(OblivionHandleCreationTest, HandlesNullLocalPath) {
     EXPECT_EQ(LIBLO_OK, lo_create_handle(&gh, LIBLO_GAME_TES4, dataPath.parent_path().string().c_str(), NULL));
+    EXPECT_NE(nullptr, gh);
 }
 #endif
 
@@ -157,7 +162,19 @@ TEST_F(OblivionOperationsTest, SetGameMaster) {
     EXPECT_EQ(LIBLO_OK, lo_set_game_master(gh, "Blank.esm"));
 
     // Try setting to a master that doesn't exist.
-    EXPECT_EQ(LIBLO_ERROR_FILE_NOT_FOUND, lo_set_game_master(gh, "EnhancedWeather.esm.missing"));
+    EXPECT_EQ(LIBLO_ERROR_FILE_NOT_FOUND, lo_set_game_master(gh, "Blank.missing.esm"));
+}
+
+TEST_F(SkyrimOperationsTest, SetGameMaster) {
+    // Skyrim's game master cannot be set, these should all fail.
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_set_game_master(gh, NULL));
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_set_game_master(gh, "EmptyFile.esm"));
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_set_game_master(gh, "NotAPlugin.esm"));
+
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_set_game_master(gh, "Blank.esm"));
+
+    // Try setting to a master that doesn't exist.
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_set_game_master(gh, "EnhancedWeather.missing.esm"));
 }
 
 TEST_F(OblivionOperationsTest, FixPluginLists) {
@@ -169,48 +186,47 @@ TEST_F(OblivionOperationsTest, FixPluginLists) {
         << "Blank - Plugin Dependent.esp" << std::endl
         << "Blank - Different Master Dependent.esp" << std::endl
         << "Blank - Master Dependent.esp" << std::endl  // Duplicate, should be removed.
-        << "Blank.esm.missing" << std::endl  // Missing, should be removed.
+        << "Blank.missing.esm" << std::endl  // Missing, should be removed.
         << "Blank.esp" << std::endl;
     active.close();
-
-    // Set the load order.
-    char * plugins[] = {
-        "Blank.esm",
-        "Blank.esp",
-        "Blank - Different Plugin Dependent.esp",
-        "Blank - Master Dependent.esp",
-        "Blank - Different Master Dependent.esp",
-        "Blank - Plugin Dependent.esp"
-    };
-    size_t pluginsNum = 6;
-    ASSERT_EQ(LIBLO_OK, lo_set_game_master(gh, "Blank.esm"));
-    ASSERT_EQ(LIBLO_OK, lo_set_load_order(gh, plugins, pluginsNum));
 
     // Now fix plugins.txt
     ASSERT_PRED1([](unsigned int i) {
         return i == LIBLO_OK || i == LIBLO_WARN_INVALID_LIST;
     }, lo_fix_plugin_lists(gh));
 
-    // Read plugins.txt. Order doesn't matter, so just check content using a sorted list.
-    std::list<std::string> expectedLines = {
-        "Blank - Different Master Dependent.esp",
-        "Blank - Master Dependent.esp",
-        "Blank - Plugin Dependent.esp",
-        "Blank.esp"
-    };
-    std::list<std::string> actualLines;
-    std::string content;
-    liblo::ifstream in(localPath / "plugins.txt");
-    while (in.good()) {
-        std::string line;
-        std::getline(in, line);
-        actualLines.push_back(line);
-    }
-    in.close();
-    actualLines.pop_back();  // Remove the trailing newline.
-    actualLines.sort();
+    // Check that fix worked.
+    EXPECT_TRUE(CheckPluginActive("Blank - Different Master Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank - Master Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank - Plugin Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank.esp"));
+    EXPECT_FALSE(CheckPluginActive("Blank.missing.esm"));
+}
 
-    EXPECT_EQ(expectedLines, actualLines);
+TEST_F(SkyrimOperationsTest, FixPluginLists) {
+    EXPECT_EQ(LIBLO_ERROR_INVALID_ARGS, lo_fix_plugin_lists(NULL));
+
+    // Write a broken plugins.txt.
+    liblo::ofstream active(localPath / "plugins.txt");
+    active << "Blank - Master Dependent.esp" << std::endl
+        << "Blank - Plugin Dependent.esp" << std::endl
+        << "Blank - Different Master Dependent.esp" << std::endl
+        << "Blank - Master Dependent.esp" << std::endl  // Duplicate, should be removed.
+        << "Blank.missing.esm" << std::endl  // Missing, should be removed.
+        << "Blank.esp" << std::endl;
+    active.close();
+
+    // Now fix plugins.txt
+    ASSERT_PRED1([](unsigned int i) {
+        return i == LIBLO_OK || i == LIBLO_WARN_INVALID_LIST;
+    }, lo_fix_plugin_lists(gh));
+
+    // Check that fix worked.
+    EXPECT_TRUE(CheckPluginActive("Blank - Different Master Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank - Master Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank - Plugin Dependent.esp"));
+    EXPECT_TRUE(CheckPluginActive("Blank.esp"));
+    EXPECT_FALSE(CheckPluginActive("Blank.missing.esm"));
 }
 
 #endif
