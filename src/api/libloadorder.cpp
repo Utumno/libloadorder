@@ -39,7 +39,7 @@ using namespace liblo;
 
 const unsigned int LIBLO_VERSION_MAJOR = 5;
 const unsigned int LIBLO_VERSION_MINOR = 0;
-const unsigned int LIBLO_VERSION_PATCH = 0;
+const unsigned int LIBLO_VERSION_PATCH = 1;
 
 /* Returns whether this version of libloadorder is compatible with the given
    version of libloadorder. */
@@ -131,6 +131,14 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
             return c_error(e);
         }
 
+        try {
+            LoadOrderFileLO.CheckValidity(**gh);
+            PluginsFileLO.CheckValidity(**gh);
+        }
+        catch (error& e) {
+            return c_error(e);
+        }
+
         //Remove any plugins from LoadOrderFileLO that are not in PluginsFileLO.
         vector<Plugin>::iterator it = LoadOrderFileLO.begin();
         while (it != LoadOrderFileLO.end()) {
@@ -178,21 +186,65 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
     if (gh == nullptr)
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Null pointer passed.");
 
+    unsigned int successRetCode = LIBLO_OK;
+
     //Only need to update loadorder.txt if it is used.
     if (gh->LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
         try {
             //Update cache if necessary.
-            if (gh->loadOrder.HasChanged(*gh))
+            if (gh->loadOrder.HasChanged(*gh)) {
                 gh->loadOrder.Load(*gh);
+                try {
+                    gh->loadOrder.CheckValidity(*gh);
+                }
+                catch (error& e) {
+                    successRetCode = c_error(e);
+                }
+            }
 
-            //Now check all plugins' existences.
+            // Ensure that the first plugin is the game's master file.
+            if (!gh->loadOrder.empty() && boost::iequals(gh->loadOrder.begin()->Name(), gh->MasterFile())) {
+                size_t pos = gh->loadOrder.Find(gh->MasterFile());
+
+                if (pos != gh->loadOrder.size()) {
+                    gh->loadOrder.Move(0, gh->loadOrder[pos]);
+                }
+                else {
+                    gh->loadOrder.insert(gh->loadOrder.begin(), gh->MasterFile());
+                }
+            }
+
+            // Now check all plugins' existences.
+            // Also check that no plugin appears more than once.
+            // Also ensure that all master files load before all plugin files.
+            unordered_set<Plugin> hashset;
+            size_t lastMasterPos = gh->loadOrder.LastMasterPos(*gh);
             vector<Plugin>::iterator it = gh->loadOrder.begin();
             while (it != gh->loadOrder.end()) {
-                if (!it->Exists(*gh))  //Active plugin is not installed.
+                if (!it->Exists(*gh)) {
+                    //Active plugin is not installed.
                     it = gh->loadOrder.erase(it);
-                else
-                    ++it;
+                    continue;
+                }
+
+                if (hashset.find(*it) != hashset.end()) {
+                    // Plugin has already appeared, remove this appearance.
+                    it = gh->loadOrder.erase(it);
+                    continue;
+                }
+
+                if (it->IsMasterFile(*gh)) {
+                    size_t pos = distance(gh->loadOrder.begin(), it);
+                    if (pos - lastMasterPos > 1) {
+                        // Master amongst plugins, move it after the last master.
+                        gh->loadOrder.Move(lastMasterPos + 1, *it);
+                    }
+                    lastMasterPos = pos;
+                }
             }
+
+            // Now write changes.
+            gh->loadOrder.Save(*gh);
         }
         catch (error& e) {
             return c_error(e);
@@ -201,8 +253,38 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
 
     try {
         //Update cache if necessary.
-        if (gh->activePlugins.HasChanged(*gh))
+        if (gh->activePlugins.HasChanged(*gh)) {
             gh->activePlugins.Load(*gh);
+            try {
+                gh->activePlugins.CheckValidity(*gh);
+            }
+            catch (error& e) {
+                successRetCode = c_error(e);
+            }
+        }
+
+        // Check that there aren't more than 255 plugins, and remove those
+        // at the end of the load order if so.
+        if (gh->activePlugins.size() > 255) {
+            size_t toRemove = gh->activePlugins.size() - 255;
+            while (toRemove > 0) {
+                for (auto rit = gh->loadOrder.crbegin(); rit != gh->loadOrder.crend(); ++rit) {
+                    auto pos = gh->activePlugins.find(*rit);
+                    if (pos != gh->activePlugins.end())
+                        gh->activePlugins.erase(pos);
+                }
+            }
+        }
+
+        if (gh->Id() == LIBLO_GAME_TES5) {
+            // Ensure Skyrim.esm is active.
+            if (gh->activePlugins.find(Plugin("Skyrim.esm")) == gh->activePlugins.end())
+                gh->activePlugins.insert(Plugin("Skyrim.esm"));
+
+            // Ensure Update.esm is active, if it is installed.
+            if (Plugin("Update.esm").Exists(*gh) && gh->activePlugins.find(Plugin("Update.esm")) == gh->activePlugins.end())
+                gh->activePlugins.insert(Plugin("Update.esm"));
+        }
 
         //Now check all plugins' existences.
         auto it = gh->activePlugins.begin();
@@ -212,10 +294,13 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
             else
                 ++it;
         }
+
+        // Now write changes.
+        gh->activePlugins.Save(*gh);
     }
     catch (error& e) {
         return c_error(e);
     }
 
-    return LIBLO_OK;
+    return successRetCode;
 }
