@@ -54,6 +54,7 @@ public:
 
     char * extString;
     char ** extStringArray;
+    void freeStringArray();
 
     size_t extStringArraySize;
 

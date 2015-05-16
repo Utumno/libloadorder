@@ -55,13 +55,7 @@ LIBLO unsigned int lo_get_load_order(lo_game_handle gh, char *** const plugins, 
     unsigned int successRetCode = LIBLO_OK;
 
     //Free memory if in use.
-    if (gh->extStringArray != nullptr) {
-        for (size_t i = 0; i < gh->extStringArraySize; i++)
-            delete[] gh->extStringArray[i];
-        delete[] gh->extStringArray;
-        gh->extStringArray = nullptr;
-        gh->extStringArraySize = 0;
-    }
+    gh->freeStringArray();
 
     //Update cache if necessary.
     try {

@@ -43,13 +43,7 @@ LIBLO unsigned int lo_get_active_plugins(lo_game_handle gh, char *** const plugi
     unsigned int successRetCode = LIBLO_OK;
 
     //Free memory if in use.
-    if (gh->extStringArray != nullptr) {
-        for (size_t i = 0; i < gh->extStringArraySize; i++)
-            delete[] gh->extStringArray[i];  //Clear all the char strings created.
-        delete[] gh->extStringArray;  //Clear the string array.
-        gh->extStringArray = nullptr;
-        gh->extStringArraySize = 0;
-    }
+    gh->freeStringArray();
 
     //Set initial outputs.
     *plugins = gh->extStringArray;
@@ -252,10 +246,7 @@ LIBLO unsigned int lo_get_plugin_active(lo_game_handle gh, const char * const pl
         return c_error(e);
     }
 
-    if (gh->activePlugins.find(pluginObj) == gh->activePlugins.end())
-        *result = false;
-    else
-        *result = true;
+    *result = gh->activePlugins.find(pluginObj) != gh->activePlugins.end();
 
     return successRetCode;
 }

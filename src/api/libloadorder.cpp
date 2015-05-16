@@ -44,10 +44,7 @@ const unsigned int LIBLO_VERSION_PATCH = 3;
 /* Returns whether this version of libloadorder is compatible with the given
    version of libloadorder. */
 LIBLO bool lo_is_compatible(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch) {
-    if (versionMajor == LIBLO_VERSION_MAJOR)
-        return true;
-    else
-        return false;
+    return versionMajor == LIBLO_VERSION_MAJOR;
 }
 
 LIBLO unsigned int lo_get_version(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch) {

@@ -50,55 +50,37 @@ _lo_game_handle_int::_lo_game_handle_int(unsigned int gameId, const string& path
     extString(nullptr),
     extStringArray(nullptr),
     extStringArraySize(0) {
-    //Set game-specific data.
+    // usual case...
+    pluginsFolderName = "Data";
+    pluginsFileName = "plugins.txt";
+    loMethod = LIBLO_METHOD_TIMESTAMP;
+    // game-specific data...
     if (id == LIBLO_GAME_TES3) {
-        loMethod = LIBLO_METHOD_TIMESTAMP;
         masterFile = "Morrowind.esm";
-
         appdataFolderName = "";
         pluginsFolderName = "Data Files";
         pluginsFileName = "Morrowind.ini";
-
         espm_settings = espm::Settings("tes3");
     }
     else if (id == LIBLO_GAME_TES4) {
-        loMethod = LIBLO_METHOD_TIMESTAMP;
         masterFile = "Oblivion.esm";
-
         appdataFolderName = "Oblivion";
-        pluginsFolderName = "Data";
-        pluginsFileName = "plugins.txt";
-
         espm_settings = espm::Settings("tes4");
     }
     else if (id == LIBLO_GAME_TES5) {
         loMethod = LIBLO_METHOD_TEXTFILE;
         masterFile = "Skyrim.esm";
-
         appdataFolderName = "Skyrim";
-        pluginsFolderName = "Data";
-        pluginsFileName = "plugins.txt";
-
         espm_settings = espm::Settings("tes5");
     }
     else if (id == LIBLO_GAME_FO3) {
-        loMethod = LIBLO_METHOD_TIMESTAMP;
         masterFile = "Fallout3.esm";
-
         appdataFolderName = "Fallout3";
-        pluginsFolderName = "Data";
-        pluginsFileName = "plugins.txt";
-
         espm_settings = espm::Settings("fo3");
     }
     else if (id == LIBLO_GAME_FNV) {
-        loMethod = LIBLO_METHOD_TIMESTAMP;
         masterFile = "FalloutNV.esm";
-
         appdataFolderName = "FalloutNV";
-        pluginsFolderName = "Data";
-        pluginsFileName = "plugins.txt";
-
         espm_settings = espm::Settings("fonv");
     }
 
@@ -109,11 +91,16 @@ _lo_game_handle_int::_lo_game_handle_int(unsigned int gameId, const string& path
 
 _lo_game_handle_int::~_lo_game_handle_int() {
     delete[] extString;
+    freeStringArray();
+}
 
+void _lo_game_handle_int::freeStringArray() {
     if (extStringArray != nullptr) {
-        for (size_t i = 0; i < extStringArraySize; i++)
+        for (size_t i = 0; i < extStringArraySize; ++i)
             delete[] extStringArray[i];  //Clear all the char strings created.
         delete[] extStringArray;  //Clear the string array.
+        extStringArray = nullptr;
+        extStringArraySize = 0;
     }
 }
 
