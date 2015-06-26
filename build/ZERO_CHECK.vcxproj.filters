@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\96e9e72fab1b738552f69a5be2b94e2c\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{4CE373DD-7776-4174-8C4A-8C6DBDCC0424}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

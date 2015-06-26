@@ -1,0 +1,340 @@
+The system is: Windows - 6.1 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler:  
+Build flags: 
+Id flags: 
+
+The output was:
+0
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:50 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdC\CompilerIdC.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "Debug\".
+  Creating directory "Debug\CompilerIdC.tlog\".
+InitializeBuildStatus:
+  Creating "Debug\CompilerIdC.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /nologo /W0 /WX- /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:queue CMakeCCompilerId.c
+  CMakeCCompilerId.c
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdC.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCCompilerId.obj
+  CompilerIdC.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdC\.\CompilerIdC.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_C_COMPILER=C:\_\Microsoft Visual Studio 12.0\VC\bin\cl.exe
+FinalizeBuildStatus:
+  Deleting file "Debug\CompilerIdC.tlog\unsuccessfulbuild".
+  Touching "Debug\CompilerIdC.tlog\CompilerIdC.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdC\CompilerIdC.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.67
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+
+The C compiler identification is MSVC, found in "C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/3.2.0-rc2/CompilerIdC/CompilerIdC.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler:  
+Build flags: 
+Id flags: 
+
+The output was:
+0
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:51 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdCXX\CompilerIdCXX.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "Debug\".
+  Creating directory "Debug\CompilerIdCXX.tlog\".
+InitializeBuildStatus:
+  Creating "Debug\CompilerIdCXX.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /nologo /W0 /WX- /Od /Oy- /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue CMakeCXXCompilerId.cpp
+  CMakeCXXCompilerId.cpp
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:".\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\CompilerIdCXX.lib" /MACHINE:X86 /SAFESEH Debug\CMakeCXXCompilerId.obj
+  CompilerIdCXX.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdCXX\.\CompilerIdCXX.exe
+PostBuildEvent:
+  for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+  :VCEnd
+  CMAKE_CXX_COMPILER=C:\_\Microsoft Visual Studio 12.0\VC\bin\cl.exe
+FinalizeBuildStatus:
+  Deleting file "Debug\CompilerIdCXX.tlog\unsuccessfulbuild".
+  Touching "Debug\CompilerIdCXX.tlog\CompilerIdCXX.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\3.2.0-rc2\CompilerIdCXX\CompilerIdCXX.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.57
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+
+The CXX compiler identification is MSVC, found in "C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/3.2.0-rc2/CompilerIdCXX/CompilerIdCXX.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/12.0/bin/MSBuild.exe" "cmTryCompileExec3101891010.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=12.0"
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:52 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec3101891010.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTryCompileExec3101891010.dir\Debug\".
+  Creating directory "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTryCompileExec3101891010.dir\Debug\cmTryCom.43561AE6.tlog\".
+InitializeBuildStatus:
+  Creating "cmTryCompileExec3101891010.dir\Debug\cmTryCom.43561AE6.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"cmTryCompileExec3101891010.dir\Debug\\" /Fd"cmTryCompileExec3101891010.dir\Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\testCCompiler.c
+  Microsoft (R) C/C++ Optimizing Compiler Version 18.00.21005.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"cmTryCompileExec3101891010.dir\Debug\\" /Fd"cmTryCompileExec3101891010.dir\Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\testCCompiler.c
+  
+  testCCompiler.c
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3101891010.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3101891010.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3101891010.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec3101891010.dir\Debug\testCCompiler.obj
+  cmTryCompileExec3101891010.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3101891010.exe
+FinalizeBuildStatus:
+  Deleting file "cmTryCompileExec3101891010.dir\Debug\cmTryCom.43561AE6.tlog\unsuccessfulbuild".
+  Touching "cmTryCompileExec3101891010.dir\Debug\cmTryCom.43561AE6.tlog\cmTryCompileExec3101891010.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec3101891010.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.04
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/12.0/bin/MSBuild.exe" "cmTryCompileExec1267853493.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=12.0"
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:53 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec1267853493.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTryCompileExec1267853493.dir\Debug\".
+  Creating directory "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTryCompileExec1267853493.dir\Debug\cmTryCom.D88F6779.tlog\".
+InitializeBuildStatus:
+  Creating "cmTryCompileExec1267853493.dir\Debug\cmTryCom.D88F6779.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"cmTryCompileExec1267853493.dir\Debug\\" /Fd"cmTryCompileExec1267853493.dir\Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:queue "C:\_\CMake\share\cmake-3.2\Modules\CMakeCCompilerABI.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 18.00.21005.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"cmTryCompileExec1267853493.dir\Debug\\" /Fd"cmTryCompileExec1267853493.dir\Debug\vc120.pdb" /Gd /TC /analyze- /errorReport:queue "C:\_\CMake\share\cmake-3.2\Modules\CMakeCCompilerABI.c"
+  CMakeCCompilerABI.c
+  
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec1267853493.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec1267853493.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec1267853493.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec1267853493.dir\Debug\CMakeCCompilerABI.obj
+  cmTryCompileExec1267853493.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec1267853493.exe
+FinalizeBuildStatus:
+  Deleting file "cmTryCompileExec1267853493.dir\Debug\cmTryCom.D88F6779.tlog\unsuccessfulbuild".
+  Touching "cmTryCompileExec1267853493.dir\Debug\cmTryCom.D88F6779.tlog\cmTryCompileExec1267853493.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec1267853493.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.62
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/12.0/bin/MSBuild.exe" "cmTryCompileExec2205331977.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=12.0"
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:54 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec2205331977.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTryCompileExec2205331977.dir\Debug\".
+  Creating directory "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTryCompileExec2205331977.dir\Debug\cmTryCom.9AF0FFE0.tlog\".
+InitializeBuildStatus:
+  Creating "cmTryCompileExec2205331977.dir\Debug\cmTryCom.9AF0FFE0.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec2205331977.dir\Debug\\" /Fd"cmTryCompileExec2205331977.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
+  Microsoft (R) C/C++ Optimizing Compiler Version 18.00.21005.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec2205331977.dir\Debug\\" /Fd"cmTryCompileExec2205331977.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\testCXXCompiler.cxx
+  
+  testCXXCompiler.cxx
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2205331977.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2205331977.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2205331977.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec2205331977.dir\Debug\testCXXCompiler.obj
+  cmTryCompileExec2205331977.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2205331977.exe
+FinalizeBuildStatus:
+  Deleting file "cmTryCompileExec2205331977.dir\Debug\cmTryCom.9AF0FFE0.tlog\unsuccessfulbuild".
+  Touching "cmTryCompileExec2205331977.dir\Debug\cmTryCom.9AF0FFE0.tlog\cmTryCompileExec2205331977.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec2205331977.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.67
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/12.0/bin/MSBuild.exe" "cmTryCompileExec3874535138.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=12.0"
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:55 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec3874535138.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTryCompileExec3874535138.dir\Debug\".
+  Creating directory "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTryCompileExec3874535138.dir\Debug\cmTryCom.8281683B.tlog\".
+InitializeBuildStatus:
+  Creating "cmTryCompileExec3874535138.dir\Debug\cmTryCom.8281683B.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec3874535138.dir\Debug\\" /Fd"cmTryCompileExec3874535138.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue "C:\_\CMake\share\cmake-3.2\Modules\CMakeCXXCompilerABI.cpp"
+  Microsoft (R) C/C++ Optimizing Compiler Version 18.00.21005.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec3874535138.dir\Debug\\" /Fd"cmTryCompileExec3874535138.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue "C:\_\CMake\share\cmake-3.2\Modules\CMakeCXXCompilerABI.cpp"
+  
+  CMakeCXXCompilerABI.cpp
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3874535138.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3874535138.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec3874535138.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec3874535138.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTryCompileExec3874535138.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec3874535138.exe
+FinalizeBuildStatus:
+  Deleting file "cmTryCompileExec3874535138.dir\Debug\cmTryCom.8281683B.tlog\unsuccessfulbuild".
+  Touching "cmTryCompileExec3874535138.dir\Debug\cmTryCom.8281683B.tlog\cmTryCompileExec3874535138.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec3874535138.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.77
+
+
+
+
+Detecting CXX [] compiler features compiled with the following output:
+Change Dir: C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"C:/Program Files (x86)/MSBuild/12.0/bin/MSBuild.exe" "cmTryCompileExec2489019688.vcxproj" "/p:Configuration=Debug" "/p:VisualStudioVersion=12.0"
+Microsoft (R) Build Engine version 12.0.21005.1
+[Microsoft .NET Framework, version 4.0.30319.34209]
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 6/26/2015 8:30:56 PM.
+Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec2489019688.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTryCompileExec2489019688.dir\Debug\".
+  Creating directory "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTryCompileExec2489019688.dir\Debug\cmTryCom.EBB03566.tlog\".
+InitializeBuildStatus:
+  Creating "cmTryCompileExec2489019688.dir\Debug\cmTryCom.EBB03566.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec2489019688.dir\Debug\\" /Fd"cmTryCompileExec2489019688.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\feature_tests.cxx
+  Microsoft (R) C/C++ Optimizing Compiler Version 18.00.21005.1 for x86
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  
+  cl /c /Zi /W3 /WX- /Od /Ob0 /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"cmTryCompileExec2489019688.dir\Debug\\" /Fd"cmTryCompileExec2489019688.dir\Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:queue C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\feature_tests.cxx
+  
+  feature_tests.cxx
+Link:
+  C:\_\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:QUEUE /OUT:"C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2489019688.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2489019688.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Dropbox/eclipse_workspaces/c++/_LIBLO/libloadorder/build/CMakeFiles/CMakeTmp/Debug/cmTryCompileExec2489019688.lib" /MACHINE:X86 /SAFESEH  /machine:X86 /debug cmTryCompileExec2489019688.dir\Debug\feature_tests.obj
+  cmTryCompileExec2489019688.vcxproj -> C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\Debug\cmTryCompileExec2489019688.exe
+FinalizeBuildStatus:
+  Deleting file "cmTryCompileExec2489019688.dir\Debug\cmTryCom.EBB03566.tlog\unsuccessfulbuild".
+  Touching "cmTryCompileExec2489019688.dir\Debug\cmTryCom.EBB03566.tlog\cmTryCompileExec2489019688.lastbuildstate".
+Done Building Project "C:\Dropbox\eclipse_workspaces\c++\_LIBLO\libloadorder\build\CMakeFiles\CMakeTmp\cmTryCompileExec2489019688.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.85
+
+
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:0cxx_alignas
+    Feature record: CXX_FEATURE:0cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:0cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:0cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:0cxx_func_identifier
+    Feature record: CXX_FEATURE:0cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:0cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:0cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:0cxx_noexcept
+    Feature record: CXX_FEATURE:0cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:0cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:0cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:0cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:0cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:0cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:0cxx_user_literals
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
