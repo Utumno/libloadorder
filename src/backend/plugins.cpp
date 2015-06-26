@@ -593,6 +593,8 @@ namespace liblo {
         for (const auto& plugin : *this) {
             if (!plugin.Exists(parentGame))
                 throw error(LIBLO_WARN_INVALID_LIST, "\"" + plugin.Name() + "\" is not installed.");
+            else if (!plugin.IsValid(parentGame))
+                throw error(LIBLO_WARN_INVALID_LIST, "\"" + plugin.Name() + "\" is not a valid plugin file.");
             /*vector<Plugin> masters = plugin.GetMasters(parentGame);
             //Disabled because it causes false positives for Filter patches. This means libloadorder doesn't check to ensure all a plugin's masters are active, but I don't think it should get mixed up with Bash Tag detection.
             for (const auto& master: masters) {

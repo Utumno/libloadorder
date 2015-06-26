@@ -97,40 +97,22 @@ LIBLO unsigned int lo_set_active_plugins(lo_game_handle gh, const char * const *
 
     //Put input into activePlugins object.
     gh->activePlugins.clear();
-    bool pluginsMissingLO = false;
     for (size_t i = 0; i < numPlugins; i++) {
         Plugin plugin(plugins[i]);
-        if (gh->activePlugins.find(plugin) != gh->activePlugins.end()) {  //Not necessary for unordered set, but present so that invalid active plugin lists are refused.
+        if (gh->activePlugins.find(plugin) != gh->activePlugins.end()) {  // duplicate !
             gh->activePlugins.clear();
-            return c_error(LIBLO_ERROR_INVALID_ARGS, "The supplied active plugins list is invalid.");
-        }
-        else if (!plugin.Exists(*gh)) {
-            gh->activePlugins.clear();
-            return c_error(LIBLO_ERROR_FILE_NOT_FOUND, "\"" + plugin.Name() + "\" cannot be found.");
-        }
-        else if (!plugin.IsValid(*gh)) {
-            gh->activePlugins.clear();
-            return c_error(LIBLO_ERROR_INVALID_ARGS, "\"" + plugin.Name() + "\" is not a valid plugin file.");
-        }
-        else {
+            return c_error(LIBLO_ERROR_INVALID_ARGS, "The supplied active plugins list contains duplicates.");
+        } else {
             //Unghost plugin if ghosted.
             try {
                 plugin.UnGhost(*gh);
             }
             catch (error& e) {
+                gh->activePlugins.clear();
                 return c_error(e);
             }
             gh->activePlugins.insert(plugin);
-            if (gh->loadOrder.Find(plugin) == gh->loadOrder.end()) {
-                pluginsMissingLO = true;
-            }
         }
-    }
-
-    // If plugins aren't in the load order, make sure they are added.
-    if (pluginsMissingLO) {
-        gh->loadOrder.Load(*gh);
-        gh->loadOrder.Save(*gh);
     }
 
     //Check to see if basic rules are being obeyed.
@@ -141,17 +123,30 @@ LIBLO unsigned int lo_set_active_plugins(lo_game_handle gh, const char * const *
         gh->activePlugins.clear();
         return c_error(LIBLO_ERROR_INVALID_ARGS, string("Invalid active plugins list supplied. Details: ") + e.what());
     }
+    // now that we know all plugins exist and are valid check if load order
+    // should be updated - this part of the code needs redesign, we must at this point
+    // have made sure a load order is loaded, to avoid a reload and a save as below (at least avoid the reload)
+    bool pluginsMissingLO = false;
+    for (const auto& plugin : gh->activePlugins)
+        if (gh->loadOrder.Find(plugin) == gh->loadOrder.end()) {
+            pluginsMissingLO = true;
+            break;
+        }
+    // If plugins aren't in the load order, make sure they are added.
+    if (pluginsMissingLO) {
+        gh->loadOrder.Load(*gh); //(ut) just Save (modified), we must at this point make sure a load order is loaded
+        gh->loadOrder.Save(*gh);
+    }
 
     //Now save changes.
     try {
-        gh->activePlugins.Save(*gh);
+        gh->activePlugins.Save(*gh); // for skyrim it will pop off 'Skyrim.esm' but it is and must be present in activePlugins
+        return LIBLO_OK;
     }
     catch (error& e) {
         gh->activePlugins.clear();
         return c_error(e);
     }
-
-    return LIBLO_OK;
 }
 
 /* Activates or deactivates the given plugin depending on the value of the active argument. */
