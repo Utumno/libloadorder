@@ -17,7 +17,7 @@
 BOOST_ROOT:PATH=C:/_/boost_1_58_0
 
 //Build a shared library
-BUILD_SHARED_LIBS:BOOL=OFF
+BUILD_SHARED_LIBS:BOOL=ON
 
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
