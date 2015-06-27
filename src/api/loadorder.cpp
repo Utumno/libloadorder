@@ -62,7 +62,7 @@ LIBLO unsigned int lo_get_load_order(lo_game_handle gh, char *** const plugins, 
         if (gh->loadOrder.HasChanged(*gh)) {
             gh->loadOrder.Load(*gh);
             try {
-                gh->loadOrder.CheckValidity(*gh);
+                gh->loadOrder.CheckValidity(*gh); // FIXME: repeats existence/validity/master checks !!!
             }
             catch (error& e) {
                 successRetCode = c_error(e);
@@ -126,24 +126,7 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
     }
 
     //Now add any additional plugins to the load order.
-    auto firstNonMaster = gh->loadOrder.FindFirstNonMaster(*gh);
-    for (fs::directory_iterator it(gh->PluginsFolder()); it != fs::directory_iterator(); ++it) {
-        if (fs::is_regular_file(it->status())) {
-            const Plugin plugin(it->path().filename().string());
-            if (plugin.IsValid(*gh) && gh->loadOrder.Find(plugin) == gh->loadOrder.cend()) {  //If the plugin is not present, add it.
-                //If it is a master, add it after the last master, otherwise add it at the end.
-                if (plugin.IsMasterFile(*gh)) {
-                    firstNonMaster = ++gh->loadOrder.insert(firstNonMaster, plugin);
-                }
-                else {
-                    // push_back may invalidate all current iterators, so reassign firstNonMaster in case.
-                    size_t firstNonMasterPos = distance(gh->loadOrder.begin(), firstNonMaster);
-                    gh->loadOrder.push_back(plugin);
-                    firstNonMaster = gh->loadOrder.begin() + firstNonMasterPos + 1;
-                }
-            }
-        }
-    }
+    gh->loadOrder.LoadAdditionalFiles(*gh);
 
     //Now save changes.
     try {

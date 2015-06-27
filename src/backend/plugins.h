@@ -45,7 +45,8 @@ namespace liblo {
         std::string Name() const;
 
         bool    IsValid(const _lo_game_handle_int& parentGame) const;  // Attempts to parse the plugin header.
-        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const;         // Checks master flag bit.
+        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, throws on invalid file
+        bool    IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, returns false on invalid file
         bool    IsGhosted(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in ghosted form.
         bool    Exists(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in the data folder, ghosted or not.
         time_t  GetModTime(const _lo_game_handle_int& parentGame) const;         //Can throw exception.
@@ -78,6 +79,8 @@ namespace liblo {
 
         std::vector<Plugin>::iterator Find(const Plugin& plugin);
         std::vector<Plugin>::iterator FindFirstNonMaster(const _lo_game_handle_int& parentGame);
+
+        bool LoadAdditionalFiles(const _lo_game_handle_int& parentGame); // HACK, scan plugins dir and load files not in parentGame.loadOrder
 
         //Assumes that the content of the file is valid.
         void LoadFromFile(const _lo_game_handle_int& parentGame, const boost::filesystem::path& file);

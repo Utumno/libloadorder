@@ -38,7 +38,7 @@ using namespace liblo;
    ------------------------------*/
 
 const unsigned int LIBLO_VERSION_MAJOR = 7;
-const unsigned int LIBLO_VERSION_MINOR = 2;
+const unsigned int LIBLO_VERSION_MINOR = 3;
 const unsigned int LIBLO_VERSION_PATCH = 0;
 
 /* Returns whether this version of libloadorder is compatible with the given
@@ -126,7 +126,9 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
         return c_error(LIBLO_ERROR_INVALID_ARGS, e.what());
     }
 
-    if ((**gh).LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && boost::filesystem::exists((**gh).ActivePluginsFile()) && boost::filesystem::exists((**gh).LoadOrderFile())) {
+    if ((**gh).LoadOrderMethod() == LIBLO_METHOD_TEXTFILE
+        && boost::filesystem::exists((**gh).ActivePluginsFile())
+        && boost::filesystem::exists((**gh).LoadOrderFile())) {
         //Check for desync.
         LoadOrder PluginsFileLO;
         LoadOrder LoadOrderFileLO;
@@ -237,7 +239,7 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
 
                 hashset.insert(*it);
 
-                if (it->IsMasterFile(*gh)
+                if (it->IsMasterFileNoThrow(*gh)
                     && distance(gh->loadOrder.begin(), it) > distance(gh->loadOrder.begin(), firstNonMaster)) {
                     // Master amongst plugins, move it after the last master.
                     firstNonMaster = ++gh->loadOrder.Move(*it, firstNonMaster);

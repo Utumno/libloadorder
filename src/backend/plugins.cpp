@@ -74,6 +74,9 @@ namespace liblo {
     }
 
     bool Plugin::IsMasterFile(const _lo_game_handle_int& parentGame) const {
+        // TODO(ut): cache ! Plugins.mtimes map<Plugin.name, pair<mod_time, Plugin>> and Plugin.isEsm
+        if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
+            throw std::invalid_argument("Invalid file extension: " + name);
         espm::File * file = nullptr;
         try {
             file = ReadHeader(parentGame);
@@ -82,7 +85,25 @@ namespace liblo {
             delete file;
             return ret;
         }
-        catch (std::exception&) {
+        catch (std::exception& e) {
+            // TODO(ut): log it !
+            if (file != nullptr) delete file;
+            throw e;
+        }
+    }
+
+    bool Plugin::IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const {
+        if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
+            return false;
+        espm::File * file = nullptr;
+        try {
+            file = ReadHeader(parentGame);
+            bool ret = file->isMaster(parentGame.espm_settings);
+            isEsm = ret;
+            delete file;
+            return ret;
+        }
+        catch (std::exception& /*e*/) {
             // TODO(ut): log it !
             if (file != nullptr) delete file;
             return false;
@@ -210,13 +231,13 @@ namespace liblo {
             // but defer reading timestamps, since it's not always necessary.
             if (p1It == pluginCache.end()) {
                 PluginSortInfo psi;
-                psi.isMasterFile = plugin1.IsMasterFile(parentGame);
+                psi.isMasterFile = plugin1.IsMasterFileNoThrow(parentGame);
                 p1It = pluginCache.insert(std::pair<std::string, PluginSortInfo>(plugin1.Name(), psi)).first;
             }
 
             if (p2It == pluginCache.end()) {
                 PluginSortInfo psi;
-                psi.isMasterFile = plugin2.IsMasterFile(parentGame);
+                psi.isMasterFile = plugin2.IsMasterFileNoThrow(parentGame);
                 p2It = pluginCache.insert(std::pair<std::string, PluginSortInfo>(plugin2.Name(), psi)).first;
             }
 
@@ -266,27 +287,7 @@ namespace liblo {
                     Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
             }
         }
-        if (fs::is_directory(parentGame.PluginsFolder())) {
-            //Now scan through Data folder. Add any plugins that aren't already in loadorder to loadorder, at the end.
-            auto firstNonMaster = FindFirstNonMaster(parentGame);
-            for (fs::directory_iterator itr(parentGame.PluginsFolder()); itr != fs::directory_iterator(); ++itr) {
-                if (fs::is_regular_file(itr->status())) {
-                    const Plugin plugin(itr->path().filename().string());
-                    if (plugin.IsValid(parentGame) && Find(plugin) == this->cend()) {
-                        //If it is a master, add it after the last master, otherwise add it at the end.
-                        if (plugin.IsMasterFile(parentGame)) {
-                            firstNonMaster = ++insert(firstNonMaster, plugin);
-                        }
-                        else {
-                            // push_back may invalidate all current iterators, so reassign firstNonMaster in case.
-                            size_t firstNonMasterPos = distance(this->begin(), firstNonMaster);
-                            this->push_back(plugin);
-                            firstNonMaster = this->begin() + firstNonMasterPos + 1;
-                        }
-                    }
-                }
-            }
-        }
+        LoadAdditionalFiles(parentGame);
         //Arrange into timestamp order if required.
         if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TIMESTAMP) {
             pluginComparator pc(parentGame);
@@ -355,7 +356,8 @@ namespace liblo {
             msg += "\"" + masterEsm.Name() + "\" is not the first plugin in the load order. " +
                     at(0).Name() + " is first.\n";
 
-        bool wasMaster = at(0).IsMasterFile(parentGame);
+        bool wasMaster = false;
+        bool wasMasterSet = false;
         unordered_set<Plugin> hashset; // check for duplicates
         for (const auto plugin : *this) {
             if (hashset.find(plugin) != hashset.end()) {
@@ -368,10 +370,15 @@ namespace liblo {
                 continue;
             }
             // plugin exists
-            bool isMaster = plugin.IsMasterFile(parentGame);
-            if (isMaster && !wasMaster)
-                msg += "Master plugin \"" + plugin.Name() + "\" loaded after a non-master plugin.\n";
-            wasMaster = isMaster;
+            bool isMaster = wasMaster;
+            try {
+                isMaster = plugin.IsMasterFile(parentGame);
+                if (wasMasterSet && isMaster && !wasMaster)
+                    msg += "Master plugin \"" + plugin.Name() + "\" loaded after a non-master plugin.\n";
+                wasMaster = isMaster; wasMasterSet = true;
+            } catch (std::exception& e) {
+                msg += "Plugin \"" + plugin.Name() + "\" is invalid - details: " + e.what() + "\n";
+            }
         }
         if (msg != "") throw error(LIBLO_WARN_INVALID_LIST, msg);
     }
@@ -431,7 +438,7 @@ namespace liblo {
 
     std::vector<Plugin>::iterator LoadOrder::FindFirstNonMaster(const _lo_game_handle_int& parentGame) {
         return find_if(this->begin(), this->end(), [&parentGame](const Plugin& plugin) {
-            return !plugin.IsMasterFile(parentGame);
+            return !plugin.IsMasterFileNoThrow(parentGame);
         });
     }
 
@@ -490,6 +497,49 @@ namespace liblo {
         }
     }
 
+    bool LoadOrder::LoadAdditionalFiles(const _lo_game_handle_int& parentGame) {
+        bool added = false;
+        if (fs::is_directory(parentGame.PluginsFolder())) {
+            //Now scan through Data folder. Add any plugins that aren't already in loadorder
+            //to loadorder, at the end. // FIXME: TIMESTAMPS METHOD !WHY AT THE END ?
+            std::vector<std::string> accumulator; // filter plugins
+            for (fs::directory_iterator itr(parentGame.PluginsFolder()); itr != fs::directory_iterator(); ++itr) {
+                string name = itr->path().filename().string();
+                if ((boost::iends_with(name, ".esm") || boost::iends_with(name, ".esp")
+                    || boost::iends_with(name, ".ghost")) && fs::is_regular_file(itr->status())) {
+                    accumulator.push_back(name);
+                }
+            }
+            // sort ghosts after regular files
+            std::sort(accumulator.begin(), accumulator.end());
+            auto firstNonMaster = FindFirstNonMaster(parentGame); // again parses the files !
+            for (string s : accumulator) {
+                const Plugin plugin(s);
+                std::string name = plugin.Name(); // lops ghost off
+                if (!(Find(plugin) == this->cend())) continue; // for ghosts and textfile method
+                bool isMaster = false;
+                try {
+                    isMaster = plugin.IsMasterFile(parentGame); // throws on "invalid" plugin
+                    //If it is a master, add it after the last master, otherwise add it at the end.
+                    if (isMaster) {
+                        firstNonMaster = ++insert(firstNonMaster, plugin);
+                    }
+                    else {
+                        // push_back may invalidate all current iterators, so reassign firstNonMaster in case.
+                        size_t firstNonMasterPos = distance(this->begin(), firstNonMaster);
+                        this->push_back(plugin);
+                        firstNonMaster = this->begin() + firstNonMasterPos + 1;
+                    }
+                    added = true;
+                }
+                catch (std::exception& /*e*/) {
+                    // LOG ! msg += "Plugin \"" + plugin.Name() + "\" is invalid - details: " + e.what() + "\n";
+                }
+            }
+        }
+        return added;
+    }
+
     ///////////////////////////
     // ActivePlugins Members
     ///////////////////////////
@@ -541,7 +591,7 @@ namespace liblo {
             if (plug.Exists(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
                 insert(plug);
                 auto firstEsp = find_if(activeOrdered.begin(), activeOrdered.end(),
-                    [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFile(parentGame);  });
+                    [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFileNoThrow(parentGame);  });
                     activeOrdered.insert(firstEsp, plug); // insert at last esm position
             }
         }
