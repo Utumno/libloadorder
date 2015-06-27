@@ -101,8 +101,12 @@ namespace liblo {
         void CheckValidity(const _lo_game_handle_int& parentGame) const;  //not more than 255 plugins active (254 for Skyrim), plugins all exist.
 
         bool HasChanged(const _lo_game_handle_int& parentGame) const;
+
+        std::vector<Plugin> &Ordered();
+        void clear();
     private:
         time_t mtime;
+        std::vector<Plugin> activeOrdered;
     };
 }
 

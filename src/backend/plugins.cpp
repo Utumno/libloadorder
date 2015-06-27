@@ -483,30 +483,30 @@ namespace liblo {
 
     void ActivePlugins::Load(const _lo_game_handle_int& parentGame) {
         clear();
-
         if (fs::exists(parentGame.ActivePluginsFile())) {
             string line;
             try {
                 liblo::ifstream in(parentGame.ActivePluginsFile());
                 in.exceptions(std::ios_base::badbit);
 
-                if (parentGame.Id() == LIBLO_GAME_TES3) {  //Morrowind's active file list is stored in Morrowind.ini, and that has a different format from plugins.txt.
-                    regex reg = regex("GameFile[0-9]{1,3}=.+\\.es(m|p)", regex::ECMAScript | regex::icase);
-                    while (getline(in, line)) {
-                        if (line.empty() || !regex_match(line, reg))
-                            continue;
-
-                        //Now cut off everything up to and including the = sign.
-                        insert(Plugin(ToUTF8(line.substr(line.find('=') + 1))));
-                    }
-                }
-                else {
+                if (!(parentGame.Id() == LIBLO_GAME_TES3)) {
                     while (getline(in, line)) {
                         // Check if it's a valid plugin line. The stream doesn't filter out '\r' line endings, hence the check.
                         if (line.empty() || line[0] == '#' || line[0] == '\r')
                             continue;
-
-                        insert(Plugin(ToUTF8(line)));
+                        Plugin plug = Plugin(ToUTF8(line));
+                        activeOrdered.push_back(plug);
+                        insert(plug);
+                    }
+                } else {   //Morrowind's active file list is stored in Morrowind.ini, and that has a different format from plugins.txt.
+                    regex reg = regex("GameFile[0-9]{1,3}=.+\\.es(m|p)", regex::ECMAScript | regex::icase);
+                    while (getline(in, line)) {
+                        if (line.empty() || !regex_match(line, reg))
+                            continue;
+                        //Now cut off everything up to and including the = sign.
+                        Plugin plug = Plugin(ToUTF8(line.substr(line.find('=') + 1)));
+                        activeOrdered.push_back(plug);
+                        insert(plug);
                     }
                 }
                 in.close();
@@ -515,13 +515,22 @@ namespace liblo {
                 throw error(LIBLO_ERROR_FILE_READ_FAIL, "\"" + parentGame.ActivePluginsFile().string() + "\" could not be read. Details: " + e.what());
             }
         }
-
-        //Add skyrim.esm, update.esm if missing.
+        // Add skyrim.esm, update.esm if missing. Note that we do not check if loaded list is valid,
+        // nevertheless we do stive to keep the list valid if originally was - TODO: check at this point
+        // and rewrite plugins txt - this requires passing a valid load order in - liblo 8
         if (parentGame.Id() == LIBLO_GAME_TES5) {
-            if (find(Plugin(parentGame.MasterFile())) == end())
-                insert(Plugin(parentGame.MasterFile()));
-            if (Plugin("Update.esm").Exists(parentGame) && find(Plugin("Update.esm")) == end())
-                insert(Plugin("Update.esm"));
+            Plugin plug = Plugin(parentGame.MasterFile());
+            if (find(plug) == end()){
+                insert(plug);
+                activeOrdered.insert(activeOrdered.begin(), plug); // insert first
+            }
+            plug = Plugin("Update.esm");
+            if (plug.Exists(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
+                insert(plug);
+                auto firstEsp = find_if(activeOrdered.begin(), activeOrdered.end(),
+                    [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFile(parentGame);  });
+                    activeOrdered.insert(firstEsp, plug); // insert at last esm position
+            }
         }
     }
 
@@ -625,4 +634,7 @@ namespace liblo {
             throw error(LIBLO_ERROR_TIMESTAMP_READ_FAIL, e.what());
         }
     }
+
+    std::vector<Plugin> &ActivePlugins::Ordered() { return activeOrdered; }
+    void ActivePlugins::clear() { std::unordered_set<Plugin>::clear(); activeOrdered.clear(); }
 }

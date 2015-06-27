@@ -70,11 +70,11 @@ LIBLO unsigned int lo_get_active_plugins(lo_game_handle gh, char *** const plugi
         return LIBLO_OK;
 
     //Allocate memory.
-    gh->extStringArraySize = gh->activePlugins.size();
+    gh->extStringArraySize = gh->activePlugins.Ordered().size();
     try {
         gh->extStringArray = new char*[gh->extStringArraySize];
         size_t i = 0;
-        for (const auto &activePlugin : gh->activePlugins) {
+        for (const auto &activePlugin : gh->activePlugins.Ordered()) {
             gh->extStringArray[i] = ToNewCString(activePlugin.Name());
             i++;
         }
@@ -112,6 +112,7 @@ LIBLO unsigned int lo_set_active_plugins(lo_game_handle gh, const char * const *
                 return c_error(e);
             }
             gh->activePlugins.insert(plugin);
+            gh->activePlugins.Ordered().push_back(plugin);
         }
     }
 
