@@ -56,9 +56,12 @@ namespace liblo {
 
         bool operator == (const Plugin& rhs) const;
         bool operator != (const Plugin& rhs) const;
+        bool esm() const;
+        bool exists() const;
     private:
         std::string name;
-
+        mutable bool isEsm = false;
+        mutable bool exist = false;
         espm::File * ReadHeader(const _lo_game_handle_int& parentGame) const;
     };
 
@@ -67,7 +70,7 @@ namespace liblo {
         void Load(const _lo_game_handle_int& parentGame);
         void Save(_lo_game_handle_int& parentGame);  //Also updates mtime and active plugins list.
 
-        void CheckValidity(const _lo_game_handle_int& parentGame);  //Game master first, masters before plugins, plugins all exist.
+        void CheckValidity(const _lo_game_handle_int& parentGame);  //Game master first, plugins all exist.
 
         bool HasChanged(const _lo_game_handle_int& parentGame) const;  //Checks timestamp and also if LoadOrder is empty.
 
