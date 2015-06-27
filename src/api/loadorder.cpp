@@ -62,7 +62,7 @@ LIBLO unsigned int lo_get_load_order(lo_game_handle gh, char *** const plugins, 
         if (gh->loadOrder.HasChanged(*gh)) {
             gh->loadOrder.Load(*gh);
             try {
-                gh->loadOrder.CheckValidity(*gh); // FIXME: repeats existence/validity/master checks !!!
+                gh->loadOrder.CheckValidity(*gh, true);
             }
             catch (error& e) {
                 successRetCode = c_error(e);
@@ -118,7 +118,7 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
 
     //Check to see if basic rules are being obeyed.
     try {
-        gh->loadOrder.CheckValidity(*gh);
+        gh->loadOrder.CheckValidity(*gh, false);
     }
     catch (error& e) {
         gh->loadOrder.clear();
@@ -126,16 +126,26 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
     }
 
     //Now add any additional plugins to the load order.
-    gh->loadOrder.LoadAdditionalFiles(*gh);
+    unsigned int successRetCode = LIBLO_OK;
+    //unordered_set<Plugin> added = gh->loadOrder.LoadAdditionalFiles(*gh);
+    //if (!added.empty()) {
+    //    std::stringstream ss;
+    //    std::for_each(
+    //        added.cbegin(),
+    //        added.cend(),
+    //        [&ss](const Plugin c) {ss << c.Name() << " "; }
+    //    );
+    //    successRetCode = c_error(LIBLO_WARN_INVALID_LIST,
+    //        "lo_set_load_order: the list you passed in does not contain the following plugins: " + ss.str());
+    //}
 
     //Now save changes.
     try {
         gh->loadOrder.Save(*gh);
+        return successRetCode;
     }
     catch (error& e) {
         gh->loadOrder.clear();
         return c_error(e);
     }
-
-    return LIBLO_OK;
 }
