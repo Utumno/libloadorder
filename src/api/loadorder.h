@@ -118,61 +118,6 @@ extern "C"
                                          const char * const * const plugins,
                                          const size_t numPlugins);
 
-    /**
-     *  @brief Get the load order position of a plugin.
-     *  @details Load order positions are zero-based, so the first plugin in
-     *           the load order has a position of "0", the next has a position
-     *           of "1", and so on.
-     *  @param gh
-     *      The game handle the function operates on.
-     *  @param plugin
-     *      The filename of the plugin to get the load order position of.
-     *  @param index
-     *      A pointer to the outputted load order index of the given plugin.
-     *  @returns A return code.
-     */
-    LIBLO unsigned int lo_get_plugin_position(lo_game_handle gh,
-                                              const char * const plugin,
-                                              size_t * const index);
-
-    /**
-     *  @brief Set the load order position of a plugin.
-     *  @details Sets the load order position of a plugin, removing it from
-     *           its current position if it has one. If the supplied position
-     *           is greater than the last position in the load order, the
-     *           plugin will be positioned at the end of the load order. Load
-     *           order positions are zero-based, so the first plugin in the
-     *           load order has a position of "0", the next has a position of
-     *           "1", and so on.
-     *  @param gh
-     *      The game handle the function operates on.
-     *  @param plugin
-     *      The filename of the plugin to set the load order position of.
-     *  @param index
-     *      The load order position to be set for the the given plugin.
-     *  @returns A return code.
-     */
-    LIBLO unsigned int lo_set_plugin_position(lo_game_handle gh,
-                                              const char * const plugin,
-                                              const size_t index);
-
-    /**
-     *  @brief Get filename of the plugin at a specific load order position.
-     *  @details Load order positions are zero-based, so the first plugin in
-     *           the load order has a position of "0", the next has a position
-     *           of "1", and so on.
-     *  @param gh
-     *      The game handle the function operates on.
-     *  @param index
-     *      The load order position to check.
-     *  @param plugin
-     *      The filename of the plugin at the given load order position.
-     *  @returns A return code.
-     */
-    LIBLO unsigned int lo_get_indexed_plugin(lo_game_handle gh,
-                                             const size_t index,
-                                             char ** const plugin);
-
     /**@}*/
 
 #ifdef __cplusplus
