@@ -684,21 +684,24 @@ namespace liblo {
     }
 
     void ActivePlugins::CheckValidity(const _lo_game_handle_int& parentGame) const {
+        std::string msg = "";
+        // FIXME tests below most often duplicate the ones in the Load order
         for (const auto& plugin : *this) {
             if (!plugin.Exists(parentGame))
-                throw error(LIBLO_WARN_INVALID_LIST, "\"" + plugin.Name() + "\" is not installed.");
+                msg += "\"" + plugin.Name() + "\" is not installed.\n";
             else if (!plugin.IsValid(parentGame))
-                throw error(LIBLO_WARN_INVALID_LIST, "\"" + plugin.Name() + "\" is not a valid plugin file.");
+                msg += "\"" + plugin.Name() + "\" is not a valid plugin file.\n";
         }
 
         if (size() > 255)
-            throw error(LIBLO_WARN_INVALID_LIST, "More than 255 plugins are active.");
+            msg += "More than 255 plugins are active.\n";
         else if (parentGame.Id() == LIBLO_GAME_TES5) {
             if (find(Plugin(parentGame.MasterFile())) == end())
-                throw error(LIBLO_WARN_INVALID_LIST, parentGame.MasterFile() + " isn't active.");
+                msg += parentGame.MasterFile() + " isn't active.\n";
             else if (Plugin("Update.esm").Exists(parentGame) && find(Plugin("Update.esm")) == end())
-                throw error(LIBLO_WARN_INVALID_LIST, "Update.esm is installed but isn't active.");
+                msg += "Update.esm is installed but isn't active.\n";
         }
+        if (msg != "") throw error(LIBLO_WARN_INVALID_LIST, msg);
     }
 
     bool ActivePlugins::HasChanged(const _lo_game_handle_int& parentGame) const {
