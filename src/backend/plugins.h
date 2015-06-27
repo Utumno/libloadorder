@@ -86,6 +86,7 @@ namespace liblo {
         void LoadFromFile(const _lo_game_handle_int& parentGame, const boost::filesystem::path& file);
     private:
         time_t mtime;
+        bool _saveActive = true;
     };
 }
 
