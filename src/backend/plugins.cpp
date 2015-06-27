@@ -264,7 +264,8 @@ namespace liblo {
 
     void LoadOrder::Load(const _lo_game_handle_int& parentGame) {
         clear();
-        if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
+        bool createLoTxt = parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE;
+        if (createLoTxt) {
             /*Game uses the new load order system.
 
             Check if loadorder.txt exists, and read that if it does.
@@ -277,10 +278,15 @@ namespace liblo {
             Patch's Masters list if it exists. That isn't something that can be easily accounted
             for though.
             */
-            if (fs::exists(parentGame.LoadOrderFile()))  //If the loadorder.txt exists, get the load order from that.
+            if (fs::exists(parentGame.LoadOrderFile())) {
+                //If the loadorder.txt exists, get the load order from that.
                 LoadFromFile(parentGame, parentGame.LoadOrderFile());
-            else if (fs::exists(parentGame.ActivePluginsFile()))  //If the plugins.txt exists, get the active load order from that.
+                createLoTxt = false;
+            }
+            else if (fs::exists(parentGame.ActivePluginsFile())) {
+                //If the plugins.txt exists, get the active load order from that.
                 LoadFromFile(parentGame, parentGame.ActivePluginsFile());
+            }
             else if (parentGame.Id() == LIBLO_GAME_TES5) {
                 //Make sure that Skyrim.esm is first.
                 Move(Plugin(parentGame.MasterFile()), this->begin());
@@ -289,7 +295,18 @@ namespace liblo {
                     Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
             }
         }
-        LoadAdditionalFiles(parentGame);
+        unordered_set<Plugin> added = LoadAdditionalFiles(parentGame);
+        if (createLoTxt || (!added.empty() && parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE)) { // we must update loadorder.txt
+            _saveActive = false; // we added files, do not mess with plugins.txt
+            try {
+                Save(const_cast<_lo_game_handle_int&>(parentGame));
+                _saveActive = true;
+            } catch (error & e) {
+                // we failed to update loadorder.txt on addition
+                _saveActive = true;
+                throw e;
+            }
+        }
         //Arrange into timestamp order if required.
         if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TIMESTAMP) {
             pluginComparator pc(parentGame);
@@ -339,7 +356,7 @@ namespace liblo {
             catch (std::ios_base::failure& e) {
                 throw error(LIBLO_ERROR_FILE_WRITE_FAIL, "\"" + parentGame.LoadOrderFile().string() + "\" cannot be written to. Details: " + e.what());
             }
-
+            if (!_saveActive) return;
             //Now write plugins.txt. Update cache if necessary.
             if (parentGame.activePlugins.HasChanged(parentGame))
                 parentGame.activePlugins.Load(parentGame);
