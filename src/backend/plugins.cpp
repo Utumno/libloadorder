@@ -347,7 +347,7 @@ namespace liblo {
         }
     }
 
-    void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame) {
+    void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame, bool _skip) {
         if (empty())
             return;
 
@@ -357,29 +357,32 @@ namespace liblo {
         if (at(0) != masterEsm)
             msg += "\"" + masterEsm.Name() + "\" is not the first plugin in the load order. " +
                     at(0).Name() + " is first.\n";
-
-        bool wasMaster = false;
-        bool wasMasterSet = false;
-        unordered_set<Plugin> hashset; // check for duplicates
-        for (const auto plugin : *this) {
-            if (hashset.find(plugin) != hashset.end()) {
-                msg += "\"" + plugin.Name() + "\" is in the load order twice.\n";
-                if (plugin.exists()) wasMaster = plugin.esm();
-                continue;
-            } else hashset.insert(plugin);
-            if (!plugin.Exists(parentGame)){
-                msg += "\"" + plugin.Name() + "\" is not installed.\n";
-                continue;
-            }
-            // plugin exists
-            bool isMaster = wasMaster;
-            try {
-                isMaster = plugin.IsMasterFile(parentGame);
-                if (wasMasterSet && isMaster && !wasMaster)
-                    msg += "Master plugin \"" + plugin.Name() + "\" loaded after a non-master plugin.\n";
-                wasMaster = isMaster; wasMasterSet = true;
-            } catch (std::exception& e) {
-                msg += "Plugin \"" + plugin.Name() + "\" is invalid - details: " + e.what() + "\n";
+        if (parentGame.LoadOrderMethod() != LIBLO_METHOD_TIMESTAMP || !_skip) { // we just loaded, performing all operations below on loading
+            bool wasMaster = false;
+            bool wasMasterSet = false;
+            unordered_set<Plugin> hashset; // check for duplicates
+            for (const auto plugin : *this) {
+                if (hashset.find(plugin) != hashset.end()) {
+                    msg += "\"" + plugin.Name() + "\" is in the load order twice.\n";
+                    if (plugin.exists()) wasMaster = plugin.esm();
+                    continue;
+                }
+                else hashset.insert(plugin);
+                if (!plugin.Exists(parentGame)){
+                    msg += "\"" + plugin.Name() + "\" is not installed.\n";
+                    continue;
+                }
+                // plugin exists
+                bool isMaster = wasMaster;
+                try {
+                    isMaster = plugin.IsMasterFile(parentGame);
+                    if (wasMasterSet && isMaster && !wasMaster)
+                        msg += "Master plugin \"" + plugin.Name() + "\" loaded after a non-master plugin.\n";
+                    wasMaster = isMaster; wasMasterSet = true;
+                }
+                catch (std::exception& e) {
+                    msg += "Plugin \"" + plugin.Name() + "\" is invalid - details: " + e.what() + "\n";
+                }
             }
         }
         if (msg != "") throw error(LIBLO_WARN_INVALID_LIST, msg);
@@ -499,8 +502,8 @@ namespace liblo {
         }
     }
 
-    bool LoadOrder::LoadAdditionalFiles(const _lo_game_handle_int& parentGame) {
-        bool added = false;
+    unordered_set<Plugin> LoadOrder::LoadAdditionalFiles(const _lo_game_handle_int& parentGame) {
+        unordered_set<Plugin> added;
         if (fs::is_directory(parentGame.PluginsFolder())) {
             //Now scan through Data folder. Add any plugins that aren't already in loadorder
             //to loadorder, at the end. // FIXME: TIMESTAMPS METHOD !WHY AT THE END ?
@@ -532,7 +535,7 @@ namespace liblo {
                         this->push_back(plugin);
                         firstNonMaster = this->begin() + firstNonMasterPos + 1;
                     }
-                    added = true;
+                    added.insert(plugin);
                 }
                 catch (std::exception& /*e*/) {
                     // LOG ! msg += "Plugin \"" + plugin.Name() + "\" is invalid - details: " + e.what() + "\n";

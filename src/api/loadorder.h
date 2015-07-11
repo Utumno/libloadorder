@@ -91,17 +91,12 @@ extern "C"
 
     /**
      *  @brief Set the load order.
-     *  @details Sets the load order to the passed plugin array, then scans the
-     *           plugins directory and inserts any plugins not included in the
-     *           passed array.
-     *
-     *           Plugin files are inserted at the end of the load order, and
-     *           master files are inserted after the last master file in the
-     *           load order. The order of plugin insertion is undefined besides
-     *           the distinction made between master files and plugin files.
-     *           This may result in an invalid load order being set, so it is
-     *           advised that all installed plugins are present in the passed
-     *           plugin array.
+     *  @details Sets the load order to the passed plugin array. All installed
+     *           plugins must be present in the array otherwise loadorder.txt
+     *           will miss plugins with unforeseen consequences or if timestamps
+     *           are used some will not be set. If load order passed in is not
+     *           valid (contains invalid or non existent plugins, or masters are
+     *           not before esps etc) LIBLO_ERROR_INVALID_ARGS will be thrown.
      *  @param gh
      *      The game handle the function operates on.
      *  @param plugins

@@ -38,8 +38,8 @@ using namespace liblo;
    ------------------------------*/
 
 const unsigned int LIBLO_VERSION_MAJOR = 7;
-const unsigned int LIBLO_VERSION_MINOR = 3;
-const unsigned int LIBLO_VERSION_PATCH = 1;
+const unsigned int LIBLO_VERSION_MINOR = 4;
+const unsigned int LIBLO_VERSION_PATCH = 0;
 
 /* Returns whether this version of libloadorder is compatible with the given
    version of libloadorder. */
@@ -151,8 +151,8 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
         }
 
         try {
-            LoadOrderFileLO.CheckValidity(**gh);
-            PluginsFileLO.CheckValidity(**gh);
+            LoadOrderFileLO.CheckValidity(**gh, false);
+            PluginsFileLO.CheckValidity(**gh, false);
         }
         catch (error& e) {
             return c_error(e);
