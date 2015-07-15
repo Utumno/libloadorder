@@ -710,7 +710,7 @@ namespace liblo {
 
         try {
             return (fs::exists(parentGame.ActivePluginsFile())) &&
-                   (fs::last_write_time(parentGame.ActivePluginsFile()) > mtime);
+                   (fs::last_write_time(parentGame.ActivePluginsFile()) != mtime);
         }
         catch (fs::filesystem_error& e) {
             throw error(LIBLO_ERROR_TIMESTAMP_READ_FAIL, e.what());
