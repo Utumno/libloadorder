@@ -334,8 +334,6 @@ namespace liblo {
                 at(i).SetModTime(parentGame, timestamp);
                 ++i;
             }
-            //Now record new plugins folder mtime.
-            mtime = fs::last_write_time(parentGame.PluginsFolder());
         }
         else {
             //Need to write both loadorder.txt and plugins.txt.
@@ -352,6 +350,7 @@ namespace liblo {
                 //Now record new loadorder.txt mtime.
                 //Plugins.txt doesn't need its mtime updated as only the order of its contents has changed, and it is stored in memory as an unordered set.
                 mtime = fs::last_write_time(parentGame.LoadOrderFile());
+                mtime_data_dir = fs::last_write_time(parentGame.PluginsFolder());
             }
             catch (std::ios_base::failure& e) {
                 throw error(LIBLO_ERROR_FILE_WRITE_FAIL, "\"" + parentGame.LoadOrderFile().string() + "\" cannot be written to. Details: " + e.what());
@@ -410,17 +409,19 @@ namespace liblo {
             return true;
 
         try {
-            if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && fs::exists(parentGame.LoadOrderFile())) {
-                //Load order is stored in parentGame.LoadOrderFile(), but load order must also be reloaded if parentGame.PluginsFolder() has been altered.
-                time_t t1 = fs::last_write_time(parentGame.LoadOrderFile());
-                time_t t2 = fs::last_write_time(parentGame.PluginsFolder());
-                if (t1 > t2) //Return later time.
-                    return (t1 > mtime);
-                else
-                    return (t2 > mtime);
+            if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE &&
+                fs::exists(parentGame.LoadOrderFile())) {
+                //Load order is stored in parentGame.LoadOrderFile(),
+                // but load order must also be reloaded if parentGame.PluginsFolder()
+                // has been altered. - (ut) checking Data/ mod time would test additions/removals only
+                // Kept it but we should add a force paramneter anyway
+                time_t mtext = fs::last_write_time(parentGame.LoadOrderFile());
+                time_t mdata = fs::last_write_time(parentGame.PluginsFolder());
+                return (mtext != mtime) || (mdata != mtime_data_dir);
             }
             else
-                //Checking parent folder modification time doesn't work consistently, and to check if the load order has changed would probably take as long as just assuming it's changed.
+                //Checking parent folder modification time doesn't work consistently, and to check if
+                // the load order has changed would probably take as long as just assuming it's changed.
                 return true;
         }
         catch (fs::filesystem_error& e) {
