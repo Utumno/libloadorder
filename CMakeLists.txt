@@ -25,7 +25,7 @@ set (Boost_USE_STATIC_LIBS ${PROJECT_STATIC_RUNTIME})
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_RUNTIME ${PROJECT_STATIC_RUNTIME})
 
-find_package(Boost REQUIRED COMPONENTS locale regex filesystem system iostreams)
+find_package(Boost REQUIRED COMPONENTS locale filesystem system iostreams)
 find_package(GTest)
 
 set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
@@ -74,8 +74,8 @@ ENDIF ()
 
 # GCC and MinGW settings.
 IF (CMAKE_COMPILER_IS_GNUCXX)
-    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
-    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++0x")
+    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++11")
+    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++11")
     IF (PROJECT_STATIC_RUNTIME)
         set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
         set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
