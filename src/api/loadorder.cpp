@@ -109,6 +109,14 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
     gh->loadOrder.clear();
     for (size_t i = 0; i < numPlugins; i++) {
         gh->loadOrder.push_back(Plugin(plugins[i]));
+        // All this below is performed in CheckValidity > IsMasterFile....
+        //Plugin plugin(plugins[i]);
+        //if (plugin.IsValid(*gh))
+        //    gh->loadOrder.push_back(plugin);
+        //else {
+        //    gh->loadOrder.clear();
+        //    return c_error(LIBLO_ERROR_FILE_NOT_FOUND, "\"" + plugin.Name() + "\" cannot be found.");
+        //}
     }
 
     //Check to see if basic rules are being obeyed. Also checks for plugin's existence.

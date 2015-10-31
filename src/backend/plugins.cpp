@@ -294,7 +294,6 @@ namespace liblo {
             else if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
                 //Make sure that the main master is first.
                 Move(Plugin(parentGame.MasterFile()), this->begin());
-
                 if (parentGame.Id() == LIBLO_GAME_TES5) {
                     //Add Update.esm if not already present.
                     if (Plugin("Update.esm").IsValid(parentGame) && Find(Plugin("Update.esm")) == this->cend())
