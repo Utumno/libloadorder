@@ -50,6 +50,11 @@ namespace liblo {
         void setLoadOrder(const std::vector<std::string>& pluginNames, const _lo_game_handle_int& gameHandle);
         void setPosition(const std::string& pluginName, size_t loadOrderIndex, const _lo_game_handle_int& gameHandle);
 
+        bool isActive(const std::string& pluginName) const;
+
+        void activate(const std::string& pluginName, const _lo_game_handle_int& gameHandle);
+        void deactivate(const std::string& pluginName, const _lo_game_handle_int& gameHandle);
+
         void CheckValidity(const _lo_game_handle_int& parentGame, bool _skip);  //Game master first, plugins all exist.
 
         bool HasChanged(const _lo_game_handle_int& parentGame) const;  //Checks timestamp and also if LoadOrder is empty.
@@ -69,6 +74,7 @@ namespace liblo {
         std::vector<Plugin> loadOrder;
 
         size_t getMasterPartitionPoint(const _lo_game_handle_int& gameHandle) const;
+        size_t countActivePlugins() const;
     };
 }
 
