@@ -72,6 +72,10 @@ namespace liblo {
         void Load(const _lo_game_handle_int& parentGame);
         void Save(_lo_game_handle_int& parentGame);  //Also updates mtime and active plugins list.
 
+        std::vector<std::string> getLoadOrder() const;
+
+        void setLoadOrder(const std::vector<std::string>& pluginNames, const _lo_game_handle_int& gameHandle);
+
         void CheckValidity(const _lo_game_handle_int& parentGame, bool _skip);  //Game master first, plugins all exist.
 
         bool HasChanged(const _lo_game_handle_int& parentGame) const;  //Checks timestamp and also if LoadOrder is empty.
