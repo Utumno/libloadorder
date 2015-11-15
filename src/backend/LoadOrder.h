@@ -26,47 +26,18 @@
 #ifndef __LIBLO_PLUGINS_H__
 #define __LIBLO_PLUGINS_H__
 
+#include "Plugin.h"
+
 #include <string>
 #include <vector>
-#include <stdint.h>
 #include <unordered_set>
+
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
-
-#include <libespm/Plugin.h>
 
 struct _lo_game_handle_int;
 
 namespace liblo {
-    class Plugin {
-    public:
-        Plugin();
-        Plugin(const std::string& filename);  //Automatically trims .ghost extension.
-
-        std::string Name() const;
-
-        bool    IsValid(const _lo_game_handle_int& parentGame) const;  // Attempts to parse the plugin header.
-        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, throws on invalid file
-        bool    IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, returns false on invalid file
-        bool    IsGhosted(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in ghosted form.
-        bool    Exists(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in the data folder, ghosted or not.
-        time_t  GetModTime(const _lo_game_handle_int& parentGame) const;         //Can throw exception.
-        std::vector<Plugin> GetMasters(const _lo_game_handle_int& parentGame) const;
-
-        void    UnGhost(const _lo_game_handle_int& parentGame) const;         //Can throw exception.
-        void    SetModTime(const _lo_game_handle_int& parentGame, const time_t modificationTime) const;
-
-        bool operator == (const Plugin& rhs) const;
-        bool operator != (const Plugin& rhs) const;
-        bool esm() const;
-        bool exists() const;
-    private:
-        std::string name;
-        mutable bool isEsm = false;
-        mutable bool exist = false;
-        libespm::Plugin ReadHeader(const _lo_game_handle_int& parentGame) const;
-    };
-
     class LoadOrder {
     public:
         void Load(const _lo_game_handle_int& parentGame);
