@@ -31,6 +31,7 @@
 #include "streams.h"
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
+#include <boost/algorithm/string.hpp>
 #include <regex>
 #include <set>
 #include <unordered_map>
@@ -61,8 +62,7 @@ namespace liblo {
         if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
             return false;
         try {
-            espm::File * file = ReadHeader(parentGame);
-            delete file;
+            libespm::Plugin plugin = ReadHeader(parentGame);
         }
         catch (std::exception& /*e*/) {
             return false;
@@ -74,17 +74,14 @@ namespace liblo {
         // TODO(ut): cache ! Plugins.mtimes map<Plugin.name, pair<mod_time, Plugin>> and Plugin.isEsm
         if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
             throw std::invalid_argument("Invalid file extension: " + name);
-        espm::File * file = nullptr;
         try {
-            file = ReadHeader(parentGame);
-            bool ret = file->isMaster(parentGame.espm_settings);
+			libespm::Plugin plugin = ReadHeader(parentGame);
+            bool ret = plugin.isMasterFile();
             isEsm = ret;
-            delete file;
             return ret;
         }
         catch (std::exception& e) {
             // TODO(ut): log it !
-            if (file != nullptr) delete file;
             throw e;
         }
     }
@@ -92,17 +89,14 @@ namespace liblo {
     bool Plugin::IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const {
         if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
             return false;
-        espm::File * file = nullptr;
         try {
-            file = ReadHeader(parentGame);
-            bool ret = file->isMaster(parentGame.espm_settings);
+			libespm::Plugin plugin = ReadHeader(parentGame);
+            bool ret = plugin.isMasterFile();
             isEsm = ret;
-            delete file;
             return ret;
         }
         catch (std::exception& /*e*/) {
             // TODO(ut): log it !
-            if (file != nullptr) delete file;
             return false;
         }
     }
@@ -132,14 +126,13 @@ namespace liblo {
     }
 
     std::vector<Plugin> Plugin::GetMasters(const _lo_game_handle_int& parentGame) const {
-        espm::File * file = ReadHeader(parentGame);
+        libespm::Plugin plugin = ReadHeader(parentGame);
 
         vector<Plugin> masters;
-        for (const auto &master : file->getMasters()) {
+        for (const auto &master : plugin.getMasters()) {
             masters.push_back(Plugin(master));
         }
 
-        delete file;
         return masters;
     }
 
@@ -174,7 +167,7 @@ namespace liblo {
         return !(*this == rhs);
     }
 
-    espm::File * Plugin::ReadHeader(const _lo_game_handle_int& parentGame) const {
+    libespm::Plugin Plugin::ReadHeader(const _lo_game_handle_int& parentGame) const {
         if (!Exists(parentGame))
             throw error(LIBLO_ERROR_FILE_NOT_FOUND, name.c_str());
 
@@ -182,22 +175,10 @@ namespace liblo {
             string filepath = (parentGame.PluginsFolder() / name).string();
             if (IsGhosted(parentGame))
                 filepath += ".ghost";
+            libespm::Plugin plugin(parentGame.getLibespmId());
+            plugin.load(filepath, true);
 
-            espm::File * file = nullptr;
-            if (parentGame.Id() == LIBLO_GAME_TES3)
-                file = new espm::tes3::File(filepath, parentGame.espm_settings, false, true);
-            else if (parentGame.Id() == LIBLO_GAME_TES4)
-                file = new espm::tes4::File(filepath, parentGame.espm_settings, false, true);
-            else if (parentGame.Id() == LIBLO_GAME_TES5)
-                file = new espm::tes5::File(filepath, parentGame.espm_settings, false, true);
-            else if (parentGame.Id() == LIBLO_GAME_FO3)
-                file = new espm::fo3::File(filepath, parentGame.espm_settings, false, true);
-            else if (parentGame.Id() == LIBLO_GAME_FNV)
-                file = new espm::fonv::File(filepath, parentGame.espm_settings, false, true);
-            else // FO4 - use TES5 header for now
-                file = new espm::tes5::File(filepath, parentGame.espm_settings, false, true);
-
-            return file;
+            return plugin;
         }
         catch (std::exception& e) {
             if (!Exists(parentGame))

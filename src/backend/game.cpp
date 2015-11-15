@@ -60,36 +60,28 @@ _lo_game_handle_int::_lo_game_handle_int(unsigned int gameId, const string& path
         appdataFolderName = "";
         pluginsFolderName = "Data Files";
         pluginsFileName = "Morrowind.ini";
-        espm_settings = espm::Settings("tes3");
     }
     else if (id == LIBLO_GAME_TES4) {
         masterFile = "Oblivion.esm";
         appdataFolderName = "Oblivion";
-        espm_settings = espm::Settings("tes4");
     }
     else if (id == LIBLO_GAME_TES5) {
         loMethod = LIBLO_METHOD_TEXTFILE;
         masterFile = "Skyrim.esm";
         appdataFolderName = "Skyrim";
-        espm_settings = espm::Settings("tes5");
     }
     else if (id == LIBLO_GAME_FO3) {
         masterFile = "Fallout3.esm";
         appdataFolderName = "Fallout3";
-        espm_settings = espm::Settings("fo3");
     }
     else if (id == LIBLO_GAME_FNV) {
         masterFile = "FalloutNV.esm";
         appdataFolderName = "FalloutNV";
-        espm_settings = espm::Settings("fonv");
     }
     else if (id == LIBLO_GAME_FO4) {
         loMethod = LIBLO_METHOD_TEXTFILE;
         masterFile = "Fallout4.esm";
         appdataFolderName = "Fallout4";
-        // For now just use TES5 settings, until libesmp
-        // is updated as well.
-        espm_settings = espm::Settings("tes5");
     }
 
 #ifdef _WIN32
@@ -157,6 +149,15 @@ void _lo_game_handle_int::SetLocalAppData(const boost::filesystem::path& localPa
 
 unsigned int _lo_game_handle_int::Id() const {
     return id;
+}
+
+libespm::GameId _lo_game_handle_int::getLibespmId() const {
+    if (Id() == LIBLO_GAME_TES3)
+        return libespm::GameId::MORROWIND;
+    else if (Id() == LIBLO_GAME_TES4)
+        return libespm::GameId::OBLIVION;
+    else
+        return libespm::GameId::SKYRIM;
 }
 
 string _lo_game_handle_int::MasterFile() const {
