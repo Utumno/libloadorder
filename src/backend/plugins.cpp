@@ -74,7 +74,7 @@ namespace liblo {
         if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
             throw std::invalid_argument("Invalid file extension: " + name);
         try {
-			libespm::Plugin plugin = ReadHeader(parentGame);
+            libespm::Plugin plugin = ReadHeader(parentGame);
             bool ret = plugin.isMasterFile();
             isEsm = ret;
             return ret;
@@ -89,7 +89,7 @@ namespace liblo {
         if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
             return false;
         try {
-			libespm::Plugin plugin = ReadHeader(parentGame);
+            libespm::Plugin plugin = ReadHeader(parentGame);
             bool ret = plugin.isMasterFile();
             isEsm = ret;
             return ret;
@@ -406,7 +406,39 @@ namespace liblo {
         });
     }
 
-    void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame, bool _skip) {
+   void LoadOrder::setPosition(const std::string& pluginName, size_t loadOrderIndex, const _lo_game_handle_int& gameHandle) {
+        // For textfile-based load order games, check that this doesn't move the game master file from the beginning of the load order.
+        if (gameHandle.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
+            if (loadOrderIndex == 0 && !boost::iequals(pluginName, gameHandle.MasterFile()))
+                throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot set \"" + pluginName + "\" to load first: \"" + gameHandle.MasterFile() + "\" most load first.");
+            else if (loadOrderIndex != 0 && !this->empty() && boost::iequals(pluginName, gameHandle.MasterFile()))
+                throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + pluginName + "\" must load first.");
+        }
+
+        // Check that the plugin is valid.
+        if (!Plugin(pluginName).IsValid(gameHandle))
+            throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + pluginName + "\" is not a valid plugin file.");
+
+        // Check that a master isn't being moved before a non-master or the inverse.
+        size_t masterPartitionPoint(getMasterPartitionPoint(gameHandle));
+        if (!Plugin(pluginName).IsMasterFile(gameHandle) && loadOrderIndex < masterPartitionPoint)
+            throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot move a non-master plugin before master files.");
+        else if (Plugin(pluginName).IsMasterFile(gameHandle)
+                 && ((loadOrderIndex > masterPartitionPoint && masterPartitionPoint != this->size())
+                 || (getPosition(pluginName) < masterPartitionPoint && loadOrderIndex == masterPartitionPoint)))
+                 throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot move a master file after non-master plugins.");
+
+        // Erase any existing entry for the plugin.
+        this->erase(remove(std::begin(*this), std::end(*this), pluginName), std::end(*this));
+
+        // If the index is larger than the load order size, set it equal to the size.
+        if (loadOrderIndex > this->size())
+            loadOrderIndex = this->size();
+
+        this->insert(next(std::begin(*this), loadOrderIndex), Plugin(pluginName));
+    }
+
+   void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame, bool _skip) {
         if (empty())
             return;
         std::string msg = "";
@@ -603,6 +635,15 @@ namespace liblo {
             }
         }
         return added;
+    }
+
+    size_t LoadOrder::getMasterPartitionPoint(const _lo_game_handle_int& gameHandle) const {
+        return distance(std::begin(*this),
+                        partition_point(std::begin(*this),
+                        std::end(*this),
+                        [&](const Plugin& plugin) {
+            return plugin.IsMasterFile(gameHandle);
+        }));
     }
 
     ///////////////////////////

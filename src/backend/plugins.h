@@ -77,6 +77,7 @@ namespace liblo {
         std::string getPluginAtPosition(size_t index) const;
 
         void setLoadOrder(const std::vector<std::string>& pluginNames, const _lo_game_handle_int& gameHandle);
+        void setPosition(const std::string& pluginName, size_t loadOrderIndex, const _lo_game_handle_int& gameHandle);
 
         void CheckValidity(const _lo_game_handle_int& parentGame, bool _skip);  //Game master first, plugins all exist.
 
@@ -95,6 +96,8 @@ namespace liblo {
         time_t mtime;
         time_t mtime_data_dir;
         bool _saveActive = true;
+
+        size_t getMasterPartitionPoint(const _lo_game_handle_int& gameHandle) const;
     };
 }
 
