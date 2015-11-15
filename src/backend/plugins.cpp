@@ -28,7 +28,6 @@
 #include "plugins.h"
 #include "game.h"
 #include "helpers.h"
-#include "streams.h"
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>
@@ -327,7 +326,7 @@ namespace liblo {
             try {
                 if (!fs::exists(parentGame.LoadOrderFile().parent_path()))
                     fs::create_directory(parentGame.LoadOrderFile().parent_path());
-                liblo::ofstream outfile(parentGame.LoadOrderFile(), ios_base::trunc);
+                fs::ofstream outfile(parentGame.LoadOrderFile(), ios_base::trunc);
                 outfile.exceptions(std::ios_base::badbit);
 
                 for (const auto &plugin : *this)
@@ -457,7 +456,7 @@ namespace liblo {
         //loadorder.txt is simple enough that we can avoid needing a formal parser.
         //It's just a text file with a plugin filename on each line. Skip lines which are blank or start with '#'.
         try {
-            liblo::ifstream in(file);
+            fs::ifstream in(file);
             in.exceptions(std::ios_base::badbit);
 
             string line;
@@ -487,7 +486,6 @@ namespace liblo {
                         throw error(LIBLO_ERROR_FILE_NOT_UTF8, "\"" + file.string() + "\" is not encoded in valid UTF-8.");
                     }
                 }
-
                 this->push_back(Plugin(line));
             }
             in.close();
@@ -559,7 +557,7 @@ namespace liblo {
         if (fs::exists(parentGame.ActivePluginsFile())) {
             string line;
             try {
-                liblo::ifstream in(parentGame.ActivePluginsFile());
+                fs::ifstream in(parentGame.ActivePluginsFile());
                 in.exceptions(std::ios_base::badbit);
 
                 if (!(parentGame.Id() == LIBLO_GAME_TES3)) {
@@ -629,7 +627,7 @@ namespace liblo {
         try {
             if (!fs::exists(parentGame.ActivePluginsFile().parent_path()))
                 fs::create_directory(parentGame.ActivePluginsFile().parent_path());
-            liblo::ofstream outfile(parentGame.ActivePluginsFile(), ios_base::trunc);
+            fs::ofstream outfile(parentGame.ActivePluginsFile(), ios_base::trunc);
             outfile.exceptions(std::ios_base::badbit);
 
             if (!settings.empty())
