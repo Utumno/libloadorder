@@ -74,15 +74,16 @@ LIBLO unsigned int lo_get_load_order(lo_game_handle gh, char *** const plugins, 
     }
 
     //Exit now if load order is empty.
-    if (gh->loadOrder.empty())
+    vector<string> loadOrder(gh->loadOrder.getLoadOrder());
+    if (loadOrder.empty())
         return LIBLO_OK;
 
     //Allocate memory.
-    gh->extStringArraySize = gh->loadOrder.size();
+    gh->extStringArraySize = loadOrder.size();
     try {
         gh->extStringArray = new char*[gh->extStringArraySize];
         for (size_t i = 0; i < gh->extStringArraySize; i++)
-            gh->extStringArray[i] = ToNewCString(gh->loadOrder[i].Name());
+            gh->extStringArray[i] = ToNewCString(loadOrder[i]);
     }
     catch (bad_alloc& e) {
         return c_error(LIBLO_ERROR_NO_MEM, e.what());
@@ -106,13 +107,15 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Zero-length plugin array passed.");
 
     //Put input into loadOrder object.
+    vector<string> loadOrder;
     gh->loadOrder.clear();
     for (size_t i = 0; i < numPlugins; i++) {
-        gh->loadOrder.push_back(Plugin(plugins[i]));
+        loadOrder.push_back(plugins[i]);
     }
 
     //Check to see if basic rules are being obeyed. Also checks for plugin's existence.
     try {
+        gh->loadOrder.setLoadOrder(loadOrder, *gh);
         gh->loadOrder.CheckValidity(*gh, false);
     }
     catch (error& e) {

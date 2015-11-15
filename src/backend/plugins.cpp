@@ -247,7 +247,7 @@ namespace liblo {
     };
 
     void LoadOrder::Load(const _lo_game_handle_int& parentGame) {
-        clear();
+        loadOrder.clear();
         bool createLoTxt = parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE;
         if (createLoTxt) {
             /*Game uses the new load order system.
@@ -273,11 +273,11 @@ namespace liblo {
             }
             else if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
                 //Make sure that the main master is first.
-                Move(Plugin(parentGame.MasterFile()), this->begin());
+                loadOrder.insert(begin(loadOrder), Plugin(parentGame.MasterFile()));
                 if (parentGame.Id() == LIBLO_GAME_TES5) {
                     //Add Update.esm if not already present.
-                    if (Plugin("Update.esm").IsValid(parentGame) && Find(Plugin("Update.esm")) == this->cend())
-                        Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+                    if (Plugin("Update.esm").IsValid(parentGame))
+                        loadOrder.push_back(Plugin("Update.esm"));
                 }
             }
         }
@@ -296,7 +296,7 @@ namespace liblo {
         //Arrange into timestamp order if required.
         if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TIMESTAMP) {
             pluginComparator pc(parentGame);
-            sort(begin(), end(), pc);
+            sort(begin(loadOrder), end(loadOrder), pc);
         }
     }
 
@@ -306,18 +306,18 @@ namespace liblo {
             //Want to make a minimum of changes to timestamps, so use the same timestamps as are currently set, but apply them to the plugins in the new order.
             //First we have to read all the timestamps.
             std::set<time_t> timestamps;
-            for (const auto &plugin : *this) {
+            for (const auto &plugin : loadOrder) {
                 timestamps.insert(plugin.GetModTime(parentGame));
             }
             // It may be that two plugins currently share the same timestamp,
             // which will result in fewer timestamps in the set than there are
             // plugins, so pad the set if necessary.
-            while (timestamps.size() < size()) {
+            while (timestamps.size() < loadOrder.size()) {
                 timestamps.insert(*timestamps.crbegin() + 60);
             }
             size_t i = 0;
             for (const auto &timestamp : timestamps) {
-                at(i).SetModTime(parentGame, timestamp);
+                loadOrder.at(i).SetModTime(parentGame, timestamp);
                 ++i;
             }
         }
@@ -329,7 +329,7 @@ namespace liblo {
                 fs::ofstream outfile(parentGame.LoadOrderFile(), ios_base::trunc);
                 outfile.exceptions(std::ios_base::badbit);
 
-                for (const auto &plugin : *this)
+                for (const auto &plugin : loadOrder)
                     outfile << plugin.Name() << endl;
                 outfile.close();
 
@@ -351,8 +351,8 @@ namespace liblo {
 
     std::vector<std::string> LoadOrder::getLoadOrder() const {
         std::vector<std::string> pluginNames;
-        transform(std::begin(*this),
-                  std::end(*this),
+        transform(begin(loadOrder),
+                  end(loadOrder),
                   back_inserter(pluginNames),
                   [](const Plugin& plugin) {
             return plugin.Name();
@@ -361,14 +361,14 @@ namespace liblo {
     }
 
     size_t LoadOrder::getPosition(const std::string& pluginName) const {
-        return distance(std::begin(*this),
-                        find(std::begin(*this),
-                        std::end(*this),
+        return distance(begin(loadOrder),
+                        find(begin(loadOrder),
+                        end(loadOrder),
                         pluginName));
     }
 
     std::string LoadOrder::getPluginAtPosition(size_t index) const {
-        return this->at(index).Name();
+        return loadOrder.at(index).Name();
     }
 
     void LoadOrder::setLoadOrder(const std::vector<std::string>& pluginNames, const _lo_game_handle_int& gameHandle) {
@@ -377,8 +377,8 @@ namespace liblo {
             throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + gameHandle.MasterFile() + "\" must load first.");
 
         // Check that all masters load before non-masters.
-        if (!is_partitioned(std::begin(pluginNames),
-            std::end(pluginNames),
+        if (!is_partitioned(begin(pluginNames),
+            end(pluginNames),
             [&](const std::string& pluginName) {
             return Plugin(pluginName).IsMasterFile(gameHandle);
         })) {
@@ -387,7 +387,7 @@ namespace liblo {
 
         // Check all plugins are valid and unique.
         unordered_set<string> hashset;
-        for_each(std::begin(pluginNames), std::end(pluginNames), [&](const std::string& pluginName) {
+        for_each(begin(pluginNames), end(pluginNames), [&](const std::string& pluginName) {
             if (hashset.find(boost::to_lower_copy(pluginName)) != hashset.end())
                 throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + pluginName + "\" is a duplicate entry.");
 
@@ -397,10 +397,10 @@ namespace liblo {
             hashset.insert(boost::to_lower_copy(pluginName));
         });
 
-        this->clear();
-        transform(std::begin(pluginNames),
-                  std::end(pluginNames),
-                  back_inserter(*this),
+        loadOrder.clear();
+        transform(begin(pluginNames),
+                  end(pluginNames),
+                  back_inserter(loadOrder),
                   [](const std::string& pluginName) {
             return Plugin(pluginName);
         });
@@ -411,7 +411,7 @@ namespace liblo {
         if (gameHandle.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
             if (loadOrderIndex == 0 && !boost::iequals(pluginName, gameHandle.MasterFile()))
                 throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot set \"" + pluginName + "\" to load first: \"" + gameHandle.MasterFile() + "\" most load first.");
-            else if (loadOrderIndex != 0 && !this->empty() && boost::iequals(pluginName, gameHandle.MasterFile()))
+            else if (loadOrderIndex != 0 && !loadOrder.empty() && boost::iequals(pluginName, gameHandle.MasterFile()))
                 throw error(LIBLO_ERROR_INVALID_ARGS, "\"" + pluginName + "\" must load first.");
         }
 
@@ -424,33 +424,33 @@ namespace liblo {
         if (!Plugin(pluginName).IsMasterFile(gameHandle) && loadOrderIndex < masterPartitionPoint)
             throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot move a non-master plugin before master files.");
         else if (Plugin(pluginName).IsMasterFile(gameHandle)
-                 && ((loadOrderIndex > masterPartitionPoint && masterPartitionPoint != this->size())
+                 && ((loadOrderIndex > masterPartitionPoint && masterPartitionPoint != loadOrder.size())
                  || (getPosition(pluginName) < masterPartitionPoint && loadOrderIndex == masterPartitionPoint)))
                  throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot move a master file after non-master plugins.");
 
         // Erase any existing entry for the plugin.
-        this->erase(remove(std::begin(*this), std::end(*this), pluginName), std::end(*this));
+        loadOrder.erase(remove(begin(loadOrder), end(loadOrder), pluginName), end(loadOrder));
 
         // If the index is larger than the load order size, set it equal to the size.
-        if (loadOrderIndex > this->size())
-            loadOrderIndex = this->size();
+        if (loadOrderIndex > loadOrder.size())
+            loadOrderIndex = loadOrder.size();
 
-        this->insert(next(std::begin(*this), loadOrderIndex), Plugin(pluginName));
+        loadOrder.insert(next(begin(loadOrder), loadOrderIndex), Plugin(pluginName));
     }
 
    void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame, bool _skip) {
-        if (empty())
+       if (loadOrder.empty())
             return;
         std::string msg = "";
         Plugin masterEsm = Plugin(parentGame.MasterFile());
-        if (at(0) != masterEsm)
+        if (loadOrder.at(0) != masterEsm)
             msg += "\"" + masterEsm.Name() + "\" is not the first plugin in the load order. " +
-                    at(0).Name() + " is first.\n";
+                loadOrder.at(0).Name() + " is first.\n";
         if (parentGame.LoadOrderMethod() != LIBLO_METHOD_TIMESTAMP || !_skip) { // we just loaded, performing all operations below on loading
             bool wasMaster = false;
             bool wasMasterSet = false;
             unordered_set<Plugin> hashset; // check for duplicates
-            for (const auto plugin : *this) {
+            for (const auto plugin : loadOrder) {
                 if (hashset.find(plugin) != hashset.end()) {
                     msg += "\"" + plugin.Name() + "\" is in the load order twice.\n";
                     if (plugin.exists()) wasMaster = plugin.esm();
@@ -478,7 +478,7 @@ namespace liblo {
     }
 
     bool LoadOrder::HasChanged(const _lo_game_handle_int& parentGame) const {
-        if (empty())
+        if (loadOrder.empty())
             return true;
 
         try {
@@ -502,39 +502,29 @@ namespace liblo {
         }
     }
 
-    std::vector<Plugin>::iterator LoadOrder::Move(const Plugin& plugin, std::vector<Plugin>::iterator newPos) {
-        if (distance(this->begin(), newPos) > this->size())
-            throw error(LIBLO_ERROR_INVALID_ARGS, "New plugin position is beyond end of container.");
-
-        if (newPos != this->end() && *newPos == plugin)
-            return newPos;  // No movement necessary.
-
-        // Inserting and erasing iterators invalidates later iterators, so first insert into
-        // the vector.
-        bool moveToEnd = (newPos == this->end());
-
-        newPos = this->insert(newPos, plugin);
-
-        auto it = this->begin();
-        while (it != this->end()) {
-            if (it != newPos
-                && (!moveToEnd || it != --this->end())
-                && *it == plugin)
-                it = this->erase(it);
-            else
-                ++it;
-        }
-
-        return newPos;
+    void LoadOrder::clear() {
+        loadOrder.clear();
     }
 
-    std::vector<Plugin>::iterator LoadOrder::Find(const Plugin& plugin) {
-        return find(this->begin(), this->end(), plugin);
+    void LoadOrder::unique() {
+        // Look for duplicate entries, removing all but the last. The reverse
+        // iterators make the algorithm move everything towards the end of the
+        // collection instead of towards the beginning.
+        unordered_set<string> hashset;
+        auto it = remove_if(rbegin(loadOrder), rend(loadOrder), [&](const Plugin& plugin) {
+            bool isNotUnique = hashset.find(boost::to_lower_copy(plugin.Name())) != hashset.end();
+            hashset.insert(boost::to_lower_copy(plugin.Name()));
+            return isNotUnique;
+        });
+
+        loadOrder.erase(begin(loadOrder), it.base());
     }
 
-    std::vector<Plugin>::iterator LoadOrder::FindFirstNonMaster(const _lo_game_handle_int& parentGame) {
-        return find_if(this->begin(), this->end(), [&parentGame](const Plugin& plugin) {
-            return !plugin.IsMasterFileNoThrow(parentGame);
+    void LoadOrder::partitionMasters(const _lo_game_handle_int& gameHandle) {
+        stable_partition(begin(loadOrder),
+                         end(loadOrder),
+                         [&](const Plugin& plugin) {
+            return plugin.IsMasterFileNoThrow(gameHandle);
         });
     }
 
@@ -575,7 +565,10 @@ namespace liblo {
                         throw error(LIBLO_ERROR_FILE_NOT_UTF8, "\"" + file.string() + "\" is not encoded in valid UTF-8.");
                     }
                 }
-                this->push_back(Plugin(line));
+
+                Plugin plugin(line);
+                if (plugin.IsValid(parentGame)) // FIXME(ut): this must go
+                    loadOrder.push_back(plugin);
             }
             in.close();
         }
@@ -585,11 +578,11 @@ namespace liblo {
 
         if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && file == parentGame.ActivePluginsFile()) {
             //Make sure the main master is first.
-            Move(Plugin(parentGame.MasterFile()), this->begin());
+            setPosition(parentGame.MasterFile(), 0, parentGame);
             if (parentGame.Id() == LIBLO_GAME_TES5) {
                 //Add Update.esm if not already present.
-                if (Plugin("Update.esm").IsValid(parentGame) && Find(Plugin("Update.esm")) == this->cend())
-                    Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+                if (Plugin("Update.esm").IsValid(parentGame) && count(begin(loadOrder), end(loadOrder), Plugin("Update.esm")) == 0)
+                    loadOrder.insert(next(begin(loadOrder), getMasterPartitionPoint(parentGame)), Plugin("Update.esm"));
             }
         }
     }
@@ -609,23 +602,21 @@ namespace liblo {
             }
             // sort ghosts after regular files
             std::sort(accumulator.begin(), accumulator.end());
-            auto firstNonMaster = FindFirstNonMaster(parentGame); // again parses the files !
+            auto firstNonMaster = getMasterPartitionPoint(parentGame); // again parses the files !
             for (string s : accumulator) {
                 const Plugin plugin(s);
                 std::string name = plugin.Name(); // lops ghost off
-                if (!(Find(plugin) == this->cend())) continue; // for ghosts and textfile method
+                if (count(begin(loadOrder), end(loadOrder), plugin) != 0) continue; // for ghosts and textfile method
                 bool isMaster = false;
                 try {
                     isMaster = plugin.IsMasterFile(parentGame); // throws on "invalid" plugin
                     //If it is a master, add it after the last master, otherwise add it at the end.
                     if (isMaster) {
-                        firstNonMaster = ++insert(firstNonMaster, plugin);
+                        loadOrder.insert(next(begin(loadOrder), firstNonMaster), plugin);
+                        ++firstNonMaster;
                     }
                     else {
-                        // push_back may invalidate all current iterators, so reassign firstNonMaster in case.
-                        size_t firstNonMasterPos = distance(this->begin(), firstNonMaster);
-                        this->push_back(plugin);
-                        firstNonMaster = this->begin() + firstNonMasterPos + 1;
+                        loadOrder.push_back(plugin);
                     }
                     added.insert(plugin);
                 }
@@ -638,9 +629,9 @@ namespace liblo {
     }
 
     size_t LoadOrder::getMasterPartitionPoint(const _lo_game_handle_int& gameHandle) const {
-        return distance(std::begin(*this),
-                        partition_point(std::begin(*this),
-                        std::end(*this),
+        return distance(begin(loadOrder),
+                        partition_point(begin(loadOrder),
+                        end(loadOrder),
                         [&](const Plugin& plugin) {
             return plugin.IsMasterFile(gameHandle);
         }));
@@ -749,12 +740,12 @@ namespace liblo {
             }
             else {
                 //Need to write the active plugins in load order.
-                for (const auto &plugin : parentGame.loadOrder) {
-                    if (find(plugin) == end() || (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && plugin.Name() == parentGame.MasterFile()))
+                for (const auto &plugin : parentGame.loadOrder.getLoadOrder()) {
+                    if (find(plugin) == end() || (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && plugin == parentGame.MasterFile()))
                         continue;
 
                     try {
-                        outfile << FromUTF8(plugin.Name()) << endl;
+                        outfile << FromUTF8(plugin) << endl;
                     }
                     catch (error& e) {
                         badFilename = e.what();

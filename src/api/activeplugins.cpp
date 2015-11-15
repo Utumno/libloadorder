@@ -129,7 +129,7 @@ LIBLO unsigned int lo_set_active_plugins(lo_game_handle gh, const char * const *
     // have made sure a load order is loaded, to avoid a reload and a save as below (at least avoid the reload)
     bool pluginsMissingLO = false;
     for (const auto& plugin : gh->activePlugins)
-        if (gh->loadOrder.Find(plugin) == gh->loadOrder.end()) {
+        if (gh->loadOrder.getPosition(plugin.Name()) == gh->loadOrder.getLoadOrder().size()) {
             pluginsMissingLO = true;
             break;
         }
@@ -179,7 +179,7 @@ LIBLO unsigned int lo_set_plugin_active(lo_game_handle gh, const char * const pl
             //Unghost plugin if ghosted.
             pluginObj.UnGhost(*gh);
             // If the plugin isn't in the load order, make sure it is added.
-            if (gh->loadOrder.Find(pluginObj) == gh->loadOrder.end()) {
+            if (gh->loadOrder.getPosition(pluginObj.Name()) == gh->loadOrder.getLoadOrder().size()) {
                 gh->loadOrder.Load(*gh);
                 gh->loadOrder.Save(*gh);
             }
