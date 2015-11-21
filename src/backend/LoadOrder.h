@@ -62,6 +62,7 @@ namespace liblo {
         void CheckValidity(const _lo_game_handle_int& parentGame, bool _skip);  //Game master first, plugins all exist.
 
         bool HasChanged(const _lo_game_handle_int& parentGame) const;  //Checks timestamp and also if LoadOrder is empty.
+        static bool isSynchronised(const _lo_game_handle_int& gameHandle);
 
         void clear();
         void unique();
@@ -69,17 +70,18 @@ namespace liblo {
 
         std::unordered_set<Plugin> LoadAdditionalFiles(const _lo_game_handle_int& parentGame); // HACK, scan plugins dir and load files not in parentGame.loadOrder
 
-        //Assumes that the content of the file is valid.
-        void LoadFromFile(const _lo_game_handle_int& parentGame, const boost::filesystem::path& file);
     private:
         time_t mtime;
         time_t mtime_data_dir;
         bool _saveActive = true;
         std::vector<Plugin> loadOrder;
 
+        void loadFromFile(const boost::filesystem::path& file, const _lo_game_handle_int& gameHandle);
+
         size_t getMasterPartitionPoint(const _lo_game_handle_int& gameHandle) const;
         size_t countActivePlugins() const;
         Plugin getPluginObject(const std::string& pluginName, const _lo_game_handle_int& gameHandle) const;
+
         std::vector<Plugin>::iterator addToLoadOrder(const std::string& pluginName, const _lo_game_handle_int& gameHandle);
     };
 }
