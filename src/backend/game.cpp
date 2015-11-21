@@ -83,6 +83,14 @@ _lo_game_handle_int::_lo_game_handle_int(unsigned int gameId, const string& path
         appdataFolderName = "FalloutNV";
         espm_settings = espm::Settings("fonv");
     }
+    else if (id == LIBLO_GAME_FO4) {
+        loMethod = LIBLO_METHOD_TEXTFILE;
+        masterFile = "Fallout4.esm";
+        appdataFolderName = "Fallout4";
+        // For now just use TES5 settings, until libesmp
+        // is updated as well.
+        espm_settings = espm::Settings("tes5");
+    }
 
 #ifdef _WIN32
     InitPaths(GetLocalAppDataPath() / appdataFolderName);

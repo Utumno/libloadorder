@@ -92,7 +92,7 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
                                     const char * const localPath) {
     if (gh == nullptr || gamePath == nullptr) //Check for valid args.
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Null pointer passed.");
-    else if (gameId != LIBLO_GAME_TES3 && gameId != LIBLO_GAME_TES4 && gameId != LIBLO_GAME_TES5 && gameId != LIBLO_GAME_FO3 && gameId != LIBLO_GAME_FNV)
+    else if (gameId != LIBLO_GAME_TES3 && gameId != LIBLO_GAME_TES4 && gameId != LIBLO_GAME_TES5 && gameId != LIBLO_GAME_FO3 && gameId != LIBLO_GAME_FNV && gameId != LIBLO_GAME_FO4)
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Invalid game specified.");
 
     //Set the locale to get encoding conversions working correctly.
