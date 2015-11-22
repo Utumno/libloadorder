@@ -13,8 +13,18 @@ project (libloadorder)
 option(BUILD_SHARED_LIBS "Build a shared library" OFF)
 option(PROJECT_STATIC_RUNTIME "Build with static runtime libs (/MT)" ON)
 
-IF (NOT DEFINED PROJECT_ARCH)
-    set (PROJECT_ARCH "32")
+# With MSVC, the 32/64 bit compilers have separate generators, so PROJECT_ARCH
+# should always match whichever is being used.
+IF (MSVC)
+    IF (CMAKE_CL_64)
+        set (PROJECT_ARCH "64")
+    ELSE ()
+        set (PROJECT_ARCH "32")
+    ENDIF ()
+ELSE ()
+    IF (NOT DEFINED PROJECT_ARCH)
+        set (PROJECT_ARCH "32")
+    ENDIF ()
 ENDIF ()
 
 IF (NOT DEFINED LIBESPM_ROOT)
@@ -42,10 +52,10 @@ set (PROJECT_HEADERS "${CMAKE_SOURCE_DIR}/src/backend/error.h"
                     "${CMAKE_SOURCE_DIR}/src/backend/game.h"
                     "${CMAKE_SOURCE_DIR}/src/backend/plugins.h"
                     "${CMAKE_SOURCE_DIR}/src/backend/streams.h"
-                    "${CMAKE_SOURCE_DIR}/src/api/constants.h"
-                    "${CMAKE_SOURCE_DIR}/src/api/libloadorder.h"
-                    "${CMAKE_SOURCE_DIR}/src/api/activeplugins.h"
-                    "${CMAKE_SOURCE_DIR}/src/api/loadorder.h")
+                    "${CMAKE_SOURCE_DIR}/include/libloadorder/constants.h"
+                    "${CMAKE_SOURCE_DIR}/include/libloadorder/libloadorder.h"
+                    "${CMAKE_SOURCE_DIR}/include/libloadorder/activeplugins.h"
+                    "${CMAKE_SOURCE_DIR}/include/libloadorder/loadorder.h")
 
 set (TESTER_SRC "${CMAKE_SOURCE_DIR}/src/tests/main.cpp")
 
@@ -58,7 +68,8 @@ source_group("Header Files" FILES ${PROJECT_HEADERS} ${TESTER_HEADERS})
 
 # Include source and library directories.
 include_directories ("${CMAKE_SOURCE_DIR}/src"
-                     ${LIBESPM_ROOT}
+                     "${CMAKE_SOURCE_DIR}/include"
+                     "${LIBESPM_ROOT}/include"
                      ${Boost_INCLUDE_DIRS}
                      ${GTEST_INCLUDE_DIRS})
 
