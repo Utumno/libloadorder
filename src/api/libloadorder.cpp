@@ -39,7 +39,7 @@ using namespace liblo;
 
 const unsigned int LIBLO_VERSION_MAJOR = 7;
 const unsigned int LIBLO_VERSION_MINOR = 6;
-const unsigned int LIBLO_VERSION_PATCH = 0;
+const unsigned int LIBLO_VERSION_PATCH = 1;
 
 /* Returns whether this version of libloadorder is compatible with the given
    version of libloadorder. */
@@ -92,7 +92,7 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
                                     const char * const localPath) {
     if (gh == nullptr || gamePath == nullptr) //Check for valid args.
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Null pointer passed.");
-    else if (gameId != LIBLO_GAME_TES3 && gameId != LIBLO_GAME_TES4 && gameId != LIBLO_GAME_TES5 && gameId != LIBLO_GAME_FO3 && gameId != LIBLO_GAME_FNV)
+    else if (gameId != LIBLO_GAME_TES3 && gameId != LIBLO_GAME_TES4 && gameId != LIBLO_GAME_TES5 && gameId != LIBLO_GAME_FO3 && gameId != LIBLO_GAME_FNV && gameId != LIBLO_GAME_FO4)
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Invalid game specified.");
 
     //Set the locale to get encoding conversions working correctly.
@@ -188,8 +188,8 @@ LIBLO void lo_destroy_handle(lo_game_handle gh) {
 LIBLO unsigned int lo_set_game_master(lo_game_handle gh, const char * const masterFile) {
     if (gh == nullptr || masterFile == nullptr) //Check for valid args.
         return c_error(LIBLO_ERROR_INVALID_ARGS, "Null pointer passed.");
-    if (gh->Id() == LIBLO_GAME_TES5)
-        return c_error(LIBLO_ERROR_INVALID_ARGS, "Cannot change Skyrim's main master file.");
+    if (gh->LoadOrderMethod() == LIBLO_METHOD_TEXTFILE)
+        return c_error(LIBLO_ERROR_INVALID_ARGS, "Cannot change main master file from " + gh->MasterFile());
 
     try {
         gh->SetMasterFile(masterFile);
@@ -264,14 +264,16 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
             gh->activePlugins.Load(*gh);
         }
 
-        if (gh->Id() == LIBLO_GAME_TES5) {
-            // Ensure Skyrim.esm is active.
+        if (gh->LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
+            // Ensure main master file is active.
             if (gh->activePlugins.find(Plugin(gh->MasterFile())) == gh->activePlugins.end())
                 gh->activePlugins.insert(Plugin(gh->MasterFile()));
 
-            // Ensure Update.esm is active, if it is installed.
-            if (Plugin("Update.esm").Exists(*gh) && gh->activePlugins.find(Plugin("Update.esm")) == gh->activePlugins.end())
-                gh->activePlugins.insert(Plugin("Update.esm"));
+            if (gh->Id() == LIBLO_GAME_TES5) {
+                // Ensure Update.esm is active, if it is installed.
+                if (Plugin("Update.esm").Exists(*gh) && gh->activePlugins.find(Plugin("Update.esm")) == gh->activePlugins.end())
+                    gh->activePlugins.insert(Plugin("Update.esm"));
+            }
         }
 
         //Now check all plugins' existences.

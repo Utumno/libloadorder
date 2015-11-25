@@ -192,8 +192,10 @@ namespace liblo {
                 file = new espm::tes5::File(filepath, parentGame.espm_settings, false, true);
             else if (parentGame.Id() == LIBLO_GAME_FO3)
                 file = new espm::fo3::File(filepath, parentGame.espm_settings, false, true);
-            else
+            else if (parentGame.Id() == LIBLO_GAME_FNV)
                 file = new espm::fonv::File(filepath, parentGame.espm_settings, false, true);
+            else // FO4 - use TES5 header for now
+                file = new espm::tes5::File(filepath, parentGame.espm_settings, false, true);
 
             return file;
         }
@@ -287,12 +289,14 @@ namespace liblo {
                 //If the plugins.txt exists, get the active load order from that.
                 LoadFromFile(parentGame, parentGame.ActivePluginsFile());
             }
-            else if (parentGame.Id() == LIBLO_GAME_TES5) {
-                //Make sure that Skyrim.esm is first.
+            else if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
+                //Make sure that the main master is first.
                 Move(Plugin(parentGame.MasterFile()), this->begin());
-                //Add Update.esm if not already present.
-                if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
-                    Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+                if (parentGame.Id() == LIBLO_GAME_TES5) {
+                    //Add Update.esm if not already present.
+                    if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
+                        Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+                }
             }
         }
         unordered_set<Plugin> added = LoadAdditionalFiles(parentGame);
@@ -511,12 +515,14 @@ namespace liblo {
             throw error(LIBLO_ERROR_FILE_READ_FAIL, "\"" + file.string() + "\" could not be read. Details: " + e.what());
         }
 
-        if (parentGame.Id() == LIBLO_GAME_TES5 && file == parentGame.ActivePluginsFile()) {
-            //Make sure that Skyrim.esm is first.
+        if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && file == parentGame.ActivePluginsFile()) {
+            //Make sure the main master is first.
             Move(Plugin(parentGame.MasterFile()), this->begin());
-            //Add Update.esm if not already present.
-            if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
-                Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+            if (parentGame.Id() == LIBLO_GAME_TES5) {
+                //Add Update.esm if not already present.
+                if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
+                    Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
+            }
         }
     }
 
@@ -604,18 +610,22 @@ namespace liblo {
         // Add skyrim.esm, update.esm if missing. Note that we do not check if loaded list is valid,
         // nevertheless we do stive to keep the list valid if originally was - TODO: check at this point
         // and rewrite plugins txt - this requires passing a valid load order in - liblo 8
-        if (parentGame.Id() == LIBLO_GAME_TES5) {
+        if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
+            // Do the game's main master file first
             Plugin plug = Plugin(parentGame.MasterFile());
             if (find(plug) == end()){
                 insert(plug);
                 activeOrdered.insert(activeOrdered.begin(), plug); // insert first
             }
-            plug = Plugin("Update.esm");
-            if (plug.Exists(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
-                insert(plug);
-                auto firstEsp = find_if(activeOrdered.begin(), activeOrdered.end(),
-                    [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFileNoThrow(parentGame);  });
-                    activeOrdered.insert(firstEsp, plug); // insert at last esm position
+            if (parentGame.Id() == LIBLO_GAME_TES5) {
+                // Do Update.esm for Skyrim
+                plug = Plugin("Update.esm");
+                if (plug.Exists(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
+                    insert(plug);
+                    auto firstEsp = find_if(activeOrdered.begin(), activeOrdered.end(),
+                        [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFileNoThrow(parentGame);  });
+                        activeOrdered.insert(firstEsp, plug); // insert at last esm position
+                }
             }
         }
     }
@@ -663,7 +673,7 @@ namespace liblo {
             else {
                 //Need to write the active plugins in load order.
                 for (const auto &plugin : parentGame.loadOrder) {
-                    if (find(plugin) == end() || (parentGame.Id() == LIBLO_GAME_TES5 && plugin.Name() == parentGame.MasterFile()))
+                    if (find(plugin) == end() || (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE && plugin.Name() == parentGame.MasterFile()))
                         continue;
 
                     try {
@@ -696,10 +706,10 @@ namespace liblo {
 
         if (size() > 255)
             msg += "More than 255 plugins are active.\n";
-        else if (parentGame.Id() == LIBLO_GAME_TES5) {
+        else if (parentGame.LoadOrderMethod() == LIBLO_METHOD_TEXTFILE) {
             if (find(Plugin(parentGame.MasterFile())) == end())
                 msg += parentGame.MasterFile() + " isn't active.\n";
-            else if (Plugin("Update.esm").Exists(parentGame) && find(Plugin("Update.esm")) == end())
+            else if (parentGame.Id() == LIBLO_GAME_TES5 && Plugin("Update.esm").Exists(parentGame) && find(Plugin("Update.esm")) == end())
                 msg += "Update.esm is installed but isn't active.\n";
         }
         if (msg != "") throw error(LIBLO_WARN_INVALID_LIST, msg);
