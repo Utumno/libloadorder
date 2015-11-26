@@ -195,6 +195,8 @@ namespace liblo {
             return file;
         }
         catch (std::exception& e) {
+            if (!Exists(parentGame))
+                throw error(LIBLO_ERROR_FILE_NOT_FOUND, name.c_str());
             throw error(LIBLO_ERROR_FILE_READ_FAIL, name + " : " + e.what());
         }
     }
