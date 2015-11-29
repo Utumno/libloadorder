@@ -83,6 +83,14 @@ _lo_game_handle_int::_lo_game_handle_int(unsigned int gameId, const string& path
         appdataFolderName = "FalloutNV";
         espm_settings = espm::Settings("fonv");
     }
+    else if (id == LIBLO_GAME_FO4) {
+        loMethod = LIBLO_METHOD_TEXTFILE;
+        masterFile = "Fallout4.esm";
+        appdataFolderName = "Fallout4";
+        // For now just use TES5 settings, until libesmp
+        // is updated as well.
+        espm_settings = espm::Settings("tes5");
+    }
 
 #ifdef _WIN32
     InitPaths(GetLocalAppDataPath() / appdataFolderName);
@@ -133,8 +141,8 @@ void _lo_game_handle_int::InitPaths(const boost::filesystem::path& localPath) {
 }
 
 void _lo_game_handle_int::SetMasterFile(const string& file) {
-    if (id == LIBLO_GAME_TES5)
-        throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot change Skyrim's main master file.");
+    if (loMethod == LIBLO_METHOD_TEXTFILE)
+        throw error(LIBLO_ERROR_INVALID_ARGS, "Cannot change game's main master file.");
     else if (!Plugin(file).Exists(*this))
         throw error(LIBLO_ERROR_FILE_NOT_FOUND, "\"" + file + "\" cannot be found.");
     else if (!Plugin(file).IsValid(*this))
