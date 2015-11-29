@@ -195,6 +195,8 @@ namespace liblo {
             return file;
         }
         catch (std::exception& e) {
+            if (!Exists(parentGame))
+                throw error(LIBLO_ERROR_FILE_NOT_FOUND, name.c_str());
             throw error(LIBLO_ERROR_FILE_READ_FAIL, name + " : " + e.what());
         }
     }
@@ -288,7 +290,7 @@ namespace liblo {
                 //Make sure that Skyrim.esm is first.
                 Move(Plugin(parentGame.MasterFile()), this->begin());
                 //Add Update.esm if not already present.
-                if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
+                if (Plugin("Update.esm").IsValid(parentGame) && Find(Plugin("Update.esm")) == this->cend())
                     Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
             }
         }
@@ -363,9 +365,7 @@ namespace liblo {
     void LoadOrder::CheckValidity(const _lo_game_handle_int& parentGame, bool _skip) {
         if (empty())
             return;
-
         std::string msg = "";
-
         Plugin masterEsm = Plugin(parentGame.MasterFile());
         if (at(0) != masterEsm)
             msg += "\"" + masterEsm.Name() + "\" is not the first plugin in the load order. " +
@@ -512,7 +512,7 @@ namespace liblo {
             //Make sure that Skyrim.esm is first.
             Move(Plugin(parentGame.MasterFile()), this->begin());
             //Add Update.esm if not already present.
-            if (Plugin("Update.esm").Exists(parentGame) && Find(Plugin("Update.esm")) == this->cend())
+            if (Plugin("Update.esm").IsValid(parentGame) && Find(Plugin("Update.esm")) == this->cend())
                 Move(Plugin("Update.esm"), FindFirstNonMaster(parentGame));
         }
     }
@@ -608,7 +608,7 @@ namespace liblo {
                 activeOrdered.insert(activeOrdered.begin(), plug); // insert first
             }
             plug = Plugin("Update.esm");
-            if (plug.Exists(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
+            if (plug.IsValid(parentGame) && find(plug) == end()) { // FIXME: must resave plugins.txt
                 insert(plug);
                 auto firstEsp = find_if(activeOrdered.begin(), activeOrdered.end(),
                     [&parentGame](const Plugin& plugin) { return !plugin.IsMasterFileNoThrow(parentGame);  });
