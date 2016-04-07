@@ -62,22 +62,45 @@ namespace liblo {
     }
 
     bool Plugin::IsMasterFile(const _lo_game_handle_int& parentGame) const {
+        // TODO(ut): cache ! Plugins.mtimes map<Plugin.name, pair<mod_time, Plugin>> and Plugin.isEsm
+        if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
+            throw std::invalid_argument("Invalid file extension: " + name);
         try {
             libespm::Plugin plugin = ReadHeader(parentGame);
-
-            return plugin.isMasterFile();
+            bool ret = plugin.isMasterFile();
+            isEsm = ret;
+            return ret;
         }
-        catch (std::exception&) {
+        catch (std::exception& e) {
+            throw e;
+        }
+    }
+
+    bool Plugin::IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const {
+        if (!boost::iends_with(name, ".esm") && !boost::iends_with(name, ".esp"))
+            return false;
+        try {
+            libespm::Plugin plugin = ReadHeader(parentGame);
+            bool ret = plugin.isMasterFile();
+            isEsm = ret;
+            return ret;
+        }
+        catch (std::exception& /*e*/) {
+            // TODO(ut): log it !
             return false;
         }
     }
 
     bool Plugin::IsGhosted(const _lo_game_handle_int& parentGame) const {
-        return (fs::exists(parentGame.PluginsFolder() / fs::path(name + ".ghost")));
+        bool isGhost = !fs::exists(parentGame.PluginsFolder() / name) &&
+            fs::exists(parentGame.PluginsFolder() / fs::path(name + ".ghost"));
+        return isGhost;
     }
 
     bool Plugin::Exists(const _lo_game_handle_int& parentGame) const {
-        return (fs::exists(parentGame.PluginsFolder() / name) || fs::exists(parentGame.PluginsFolder() / fs::path(name + ".ghost")));
+        exist = fs::exists(parentGame.PluginsFolder() / name) ||
+            fs::exists(parentGame.PluginsFolder() / fs::path(name + ".ghost"));
+        return exist;
     }
 
     time_t Plugin::GetModTime(const _lo_game_handle_int& parentGame) const {
@@ -149,7 +172,12 @@ namespace liblo {
             return plugin;
         }
         catch (std::exception& e) {
+            if (!Exists(parentGame))
+                throw error(LIBLO_ERROR_FILE_NOT_FOUND, name.c_str());
             throw error(LIBLO_ERROR_FILE_READ_FAIL, name + " : " + e.what());
         }
     }
+
+    bool Plugin::esm() const { return isEsm; }
+    bool Plugin::exists() const { return exist; }
 }

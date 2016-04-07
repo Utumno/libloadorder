@@ -42,7 +42,8 @@ namespace liblo {
         std::string Name() const;
 
         bool    IsValid(const _lo_game_handle_int& parentGame) const;  // Attempts to parse the plugin header.
-        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const;         // Checks master flag bit.
+        bool    IsMasterFile(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, throws on invalid file
+        bool    IsMasterFileNoThrow(const _lo_game_handle_int& parentGame) const; // Checks master flag bit, returns false on invalid file
         bool    IsGhosted(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in ghosted form.
         bool    Exists(const _lo_game_handle_int& parentGame) const;         //Checks if the file exists in the data folder, ghosted or not.
         time_t  GetModTime(const _lo_game_handle_int& parentGame) const;         //Can throw exception.
@@ -53,8 +54,12 @@ namespace liblo {
 
         bool operator == (const Plugin& rhs) const;
         bool operator != (const Plugin& rhs) const;
+        bool esm() const;
+        bool exists() const;
     private:
         std::string name;
+        mutable bool isEsm = false;
+        mutable bool exist = false;
 
         libespm::Plugin ReadHeader(const _lo_game_handle_int& parentGame) const;
     };
