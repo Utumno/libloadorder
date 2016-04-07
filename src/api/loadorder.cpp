@@ -123,24 +123,10 @@ LIBLO unsigned int lo_set_load_order(lo_game_handle gh, const char * const * con
         return c_error(LIBLO_ERROR_INVALID_ARGS, string("Invalid load order supplied. Details: ") + e.what());
     }
 
-    //Now add any additional plugins to the load order.
-    unsigned int successRetCode = LIBLO_OK;
-    //unordered_set<Plugin> added = gh->loadOrder.LoadAdditionalFiles(*gh);
-    //if (!added.empty()) {
-    //    std::stringstream ss;
-    //    std::for_each(
-    //        added.cbegin(),
-    //        added.cend(),
-    //        [&ss](const Plugin c) {ss << c.Name() << " "; }
-    //    );
-    //    successRetCode = c_error(LIBLO_WARN_INVALID_LIST,
-    //        "lo_set_load_order: the list you passed in does not contain the following plugins: " + ss.str());
-    //}
-
     //Now save changes.
     try {
         gh->loadOrder.Save(*gh);
-        return successRetCode;
+        return LIBLO_OK;
     }
     catch (error& e) {
         gh->loadOrder.clear();
