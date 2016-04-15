@@ -23,16 +23,13 @@
     <http://www.gnu.org/licenses/>.
     */
 
-#ifndef __LIBLO_PLUGINS_H__
-#define __LIBLO_PLUGINS_H__
+#ifndef LIBLO_PLUGIN_H
+#define LIBLO_PLUGIN_H
 
 #include <string>
 #include <vector>
-#include <stdint.h>
-#include <unordered_set>
-#include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
-#include <libespm/libespm.h>
+
+#include <libespm/Plugin.h>
 
 struct _lo_game_handle_int;
 
@@ -55,6 +52,11 @@ namespace liblo {
         void    UnGhost(const _lo_game_handle_int& parentGame) const;         //Can throw exception.
         void    SetModTime(const _lo_game_handle_int& parentGame, const time_t modificationTime) const;
 
+        bool isActive() const;
+
+        void activate();
+        void deactivate();
+
         bool operator == (const Plugin& rhs) const;
         bool operator != (const Plugin& rhs) const;
         bool esm() const;
@@ -63,58 +65,9 @@ namespace liblo {
         std::string name;
         mutable bool isEsm = false;
         mutable bool exist = false;
-        espm::File * ReadHeader(const _lo_game_handle_int& parentGame) const;
-    };
+        bool active;
 
-    class LoadOrder : public std::vector < Plugin > {
-    public:
-        void Load(const _lo_game_handle_int& parentGame);
-        void Save(_lo_game_handle_int& parentGame);  //Also updates mtime and active plugins list.
-
-        void CheckValidity(const _lo_game_handle_int& parentGame, bool _skip);  //Game master first, plugins all exist.
-
-        bool HasChanged(const _lo_game_handle_int& parentGame) const;  //Checks timestamp and also if LoadOrder is empty.
-
-        std::vector<Plugin>::iterator Move(const Plugin& plugin, std::vector<Plugin>::iterator newPos);
-
-        std::vector<Plugin>::iterator Find(const Plugin& plugin);
-        std::vector<Plugin>::iterator FindFirstNonMaster(const _lo_game_handle_int& parentGame);
-
-        std::unordered_set<Plugin> LoadAdditionalFiles(const _lo_game_handle_int& parentGame); // HACK, scan plugins dir and load files not in parentGame.loadOrder
-
-        //Assumes that the content of the file is valid.
-        void LoadFromFile(const _lo_game_handle_int& parentGame, const boost::filesystem::path& file);
-    private:
-        time_t mtime;
-        time_t mtime_data_dir;
-        bool _saveActive = true;
-    };
-}
-
-namespace std {
-    template <>
-    struct hash < liblo::Plugin > {
-        size_t operator()(const liblo::Plugin& p) const {
-            return hash<std::string>()(boost::locale::to_lower(p.Name()));
-        }
-    };
-}
-
-namespace liblo {
-    class ActivePlugins : public std::unordered_set < Plugin > {
-    public:
-        void Load(const _lo_game_handle_int& parentGame);
-        void Save(const _lo_game_handle_int& parentGame);
-
-        void CheckValidity(const _lo_game_handle_int& parentGame) const;  //not more than 255 plugins active (254 for Skyrim), plugins all exist.
-
-        bool HasChanged(const _lo_game_handle_int& parentGame) const;
-
-        std::vector<Plugin> &Ordered();
-        void clear();
-    private:
-        time_t mtime;
-        std::vector<Plugin> activeOrdered;
+        libespm::Plugin ReadHeader(const _lo_game_handle_int& parentGame) const;
     };
 }
 

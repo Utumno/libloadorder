@@ -35,13 +35,14 @@ set (Boost_USE_STATIC_LIBS ${PROJECT_STATIC_RUNTIME})
 set (Boost_USE_MULTITHREADED ON)
 set (Boost_USE_STATIC_RUNTIME ${PROJECT_STATIC_RUNTIME})
 
-find_package(Boost REQUIRED COMPONENTS locale filesystem system iostreams)
+find_package(Boost REQUIRED COMPONENTS locale filesystem system)
 find_package(GTest)
 
 set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
                     "${CMAKE_SOURCE_DIR}/src/backend/helpers.cpp"
                     "${CMAKE_SOURCE_DIR}/src/backend/game.cpp"
-                    "${CMAKE_SOURCE_DIR}/src/backend/plugins.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/backend/LoadOrder.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/backend/Plugin.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/constants.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/libloadorder.cpp"
                     "${CMAKE_SOURCE_DIR}/src/api/activeplugins.cpp"
@@ -50,8 +51,8 @@ set (PROJECT_SRC    "${CMAKE_SOURCE_DIR}/src/backend/error.cpp"
 set (PROJECT_HEADERS "${CMAKE_SOURCE_DIR}/src/backend/error.h"
                     "${CMAKE_SOURCE_DIR}/src/backend/helpers.h"
                     "${CMAKE_SOURCE_DIR}/src/backend/game.h"
-                    "${CMAKE_SOURCE_DIR}/src/backend/plugins.h"
-                    "${CMAKE_SOURCE_DIR}/src/backend/streams.h"
+                    "${CMAKE_SOURCE_DIR}/src/backend/LoadOrder.h"
+                    "${CMAKE_SOURCE_DIR}/src/backend/Plugin.h"
                     "${CMAKE_SOURCE_DIR}/include/libloadorder/constants.h"
                     "${CMAKE_SOURCE_DIR}/include/libloadorder/libloadorder.h"
                     "${CMAKE_SOURCE_DIR}/include/libloadorder/activeplugins.h"
@@ -62,7 +63,10 @@ set (TESTER_SRC "${CMAKE_SOURCE_DIR}/src/tests/main.cpp")
 set (TESTER_HEADERS "${CMAKE_SOURCE_DIR}/src/tests/fixtures.h"
 					"${CMAKE_SOURCE_DIR}/src/tests/api/libloadorder.h"
 					"${CMAKE_SOURCE_DIR}/src/tests/api/activeplugins.h"
-					"${CMAKE_SOURCE_DIR}/src/tests/api/loadorder.h")
+					"${CMAKE_SOURCE_DIR}/src/tests/api/loadorder.h"
+                    "${CMAKE_SOURCE_DIR}/src/tests/backend/GameHandleTest.h"
+                    "${CMAKE_SOURCE_DIR}/src/tests/backend/LoadOrderTest.h"
+                    "${CMAKE_SOURCE_DIR}/src/tests/backend/PluginTest.h")
 
 source_group("Header Files" FILES ${PROJECT_HEADERS} ${TESTER_HEADERS})
 
@@ -85,8 +89,8 @@ ENDIF ()
 
 # GCC and MinGW settings.
 IF (CMAKE_COMPILER_IS_GNUCXX)
-    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++11")
-    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++11")
+    set (CMAKE_C_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++14")
+    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH} -O3 -std=c++14")
     IF (PROJECT_STATIC_RUNTIME)
         set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
         set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc")

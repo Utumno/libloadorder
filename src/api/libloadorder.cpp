@@ -39,7 +39,7 @@ using namespace liblo;
 
 const unsigned int LIBLO_VERSION_MAJOR = 7;
 const unsigned int LIBLO_VERSION_MINOR = 6;
-const unsigned int LIBLO_VERSION_PATCH = 1;
+const unsigned int LIBLO_VERSION_PATCH = 2;
 
 /* Returns whether this version of libloadorder is compatible with the given
    version of libloadorder. */
@@ -126,53 +126,21 @@ LIBLO unsigned int lo_create_handle(lo_game_handle * const gh,
         return c_error(LIBLO_ERROR_INVALID_ARGS, e.what());
     }
 
-    if ((**gh).LoadOrderMethod() == LIBLO_METHOD_TEXTFILE
-        && boost::filesystem::exists((**gh).ActivePluginsFile())
-        && boost::filesystem::exists((**gh).LoadOrderFile())) {
-        //Check for desync.
-        LoadOrder PluginsFileLO;
-        LoadOrder LoadOrderFileLO;
-
-        try {
-            //First get load order according to loadorder.txt.
-            LoadOrderFileLO.LoadFromFile(**gh, (**gh).LoadOrderFile());
-            //Get load order from plugins.txt.
-            PluginsFileLO.LoadFromFile(**gh, (**gh).ActivePluginsFile());
-        }
-        catch (error& e) {
-            delete *gh;
-            *gh = nullptr;
-            return c_error(e);
-        }
-        catch (std::exception& e) {
-            delete *gh;
-            *gh = nullptr;
-            return c_error(LIBLO_ERROR_FILE_READ_FAIL, e.what());
-        }
-
-        try {
-            LoadOrderFileLO.CheckValidity(**gh, false);
-            PluginsFileLO.CheckValidity(**gh, false);
-        }
-        catch (error& e) {
-            return c_error(e);
-        }
-        catch (std::exception& e) {
-            return c_error(LIBLO_ERROR_FILE_READ_FAIL, e.what());
-        }
-
-        //Remove any plugins from LoadOrderFileLO that are not in PluginsFileLO.
-        vector<Plugin>::iterator it = LoadOrderFileLO.begin();
-        while (it != LoadOrderFileLO.end()) {
-            if (PluginsFileLO.Find(*it) == PluginsFileLO.cend())
-                it = LoadOrderFileLO.erase(it);
-            else
-                ++it;
-        }
-
-        //Compare the two LoadOrder objects: they should be identical (since mtimes for each have not been touched).
-        if (PluginsFileLO != LoadOrderFileLO)
+    try {
+        // Check for desync. This is a textfile-specific issue, but the checking
+        // function will handle that distinction.
+        if (!(**gh).loadOrder.isSynchronised(**gh))
             return c_error(LIBLO_WARN_LO_MISMATCH, "The order of plugins present in both loadorder.txt and plugins.txt differs between the two files.");
+    }
+    catch (error& e) {
+        delete *gh;
+        *gh = nullptr;
+        return c_error(e);
+    }
+    catch (std::exception& e) {
+        delete *gh;
+        *gh = nullptr;
+        return c_error(LIBLO_ERROR_FILE_READ_FAIL, e.what());
     }
 
     return LIBLO_OK;
@@ -219,36 +187,13 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
             }
 
             // Ensure that the first plugin is the game's master file.
-            gh->loadOrder.Move(gh->MasterFile(), gh->loadOrder.begin());
+            gh->loadOrder.setPosition(gh->MasterFile(), 0, *gh);
 
-            // Now check all plugins' existences.
-            // Also check that no plugin appears more than once.
-            // Also ensure that all master files load before all plugin files.
-            unordered_set<Plugin> hashset;
-            auto firstNonMaster = gh->loadOrder.FindFirstNonMaster(*gh);
-            vector<Plugin>::iterator it = gh->loadOrder.begin();
-            while (it != gh->loadOrder.end()) {
-                if (hashset.find(*it) != hashset.end() || !it->Exists(*gh)) {
-                    // Plugin is a duplicate or is not installed.
-                    bool refindFirstNonMaster = distance(gh->loadOrder.begin(), it) <= distance(gh->loadOrder.begin(), firstNonMaster);
-                    it = gh->loadOrder.erase(it);
-                    if (refindFirstNonMaster)
-                        firstNonMaster = gh->loadOrder.FindFirstNonMaster(*gh);
-                    continue;
-                }
+            // Ensure that no plugin appears more than once.
+            gh->loadOrder.unique();
 
-                hashset.insert(*it);
-
-                if (it->IsMasterFileNoThrow(*gh)
-                    && distance(gh->loadOrder.begin(), it) > distance(gh->loadOrder.begin(), firstNonMaster)) {
-                    // Master amongst plugins, move it after the last master.
-                    firstNonMaster = ++gh->loadOrder.Move(*it, firstNonMaster);
-                    it = firstNonMaster;
-                    continue;
-                }
-
-                ++it;
-            }
+            // Ensure that all master files load before all plugin files.
+            gh->loadOrder.partitionMasters(*gh);
 
             // Now write changes.
             gh->loadOrder.Save(*gh);
@@ -288,9 +233,10 @@ LIBLO unsigned int lo_fix_plugin_lists(lo_game_handle gh) {
         // Check that there aren't more than 255 plugins, and remove those
         // at the end of the load order if so.
         if (gh->activePlugins.size() > 255) {
+            vector<string> loadOrder(gh->loadOrder.getLoadOrder());
             size_t toRemove = gh->activePlugins.size() - 255;
             while (toRemove > 0) {
-                for (auto rit = gh->loadOrder.crbegin(); rit != gh->loadOrder.crend(); ++rit) {
+                for (auto rit = rbegin(loadOrder); rit != rend(loadOrder); ++rit) {
                     auto pos = gh->activePlugins.find(*rit);
                     if (pos != gh->activePlugins.end())
                         gh->activePlugins.erase(pos);
